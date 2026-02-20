@@ -1,0 +1,171 @@
+---
+title: Campaigns
+description: A campaign is a batch of email messages sent to your subscribers. Common examples include product launch announcements, weekly newsletters, promotional offers,
+---
+
+# Campaigns
+
+## What is a Campaign?
+
+A campaign is a batch of email messages sent to your subscribers. Common examples include product launch announcements, weekly newsletters, promotional offers, or transactional notifications. Each campaign uses a template and targeting rules to deliver consistent, personalized messages at scale.
+
+## Before You Start
+
+You'll need three things set up before creating your first campaign:
+
+1. **An email service** — Configure at least one email provider (e.g., SendGrid, Mailgun) in your email services settings. This is where your emails will actually be sent from.
+2. **A subscriber list** — Add the people you want to email to your subscribers database.
+3. **An email template** (recommended) — Create a reusable template with your branding, layout, and content structure. While optional, templates make campaigns much faster and more consistent.
+
+> **Tip:** Start with a simple template if you're new to campaigns. You can always create more sophisticated templates later.
+
+---
+
+## Creating a Campaign
+
+### Step 1: Navigate to Campaigns
+
+Click **Campaigns** in the sidebar to view your campaign list, then click the **New Campaign** button.
+
+### Step 2: Fill Out Campaign Details
+
+#### Campaign Name
+A descriptive name for your internal reference only (not seen by subscribers). Examples: "Newsletter - December 2024" or "Holiday Sale Announcement". Choose something that makes it easy to find and identify the campaign later.
+
+#### Subject Line
+The subject line recipients see in their inbox. Keep it clear, compelling, and concise — this often determines whether emails get opened.
+
+You can personalize the subject line using placeholders:
+- `\&#123;\\&#123;first_name\&#125;\\&#125;` — recipient's first name
+- `\&#123;\\&#123;last_name\&#125;\\&#125;` — recipient's last name
+- `\&#123;\\&#123;email\&#125;\\&#125;` — recipient's email address
+
+*Example:* "Hi \&#123;\\&#123;first_name\&#125;\\&#125;, check out our new products!" becomes "Hi Sarah, check out our new products!"
+
+For more advanced placeholder options, see the [Templates documentation](/docs/features/template).
+
+#### From Name
+The sender name that appears in recipients' inboxes (e.g., "Sarah from Acme Co." or "The Acme Team"). This builds trust and recognition.
+
+#### From Email
+The sender email address. This address must:
+- Be one you own or control
+- Match the email service configuration for the account you've selected
+- Be verified by your email service provider
+
+#### Email Service
+Select which email provider will send this campaign. Make sure you've already configured the service in your email settings.
+
+#### Template (Optional but Recommended)
+Choose a pre-built template to use for this campaign's body content. Using templates ensures consistency and saves time, especially for recurring campaigns.
+
+#### Tracking Options
+
+**Track Opens** — Record whether each recipient opened the email. Requires webhooks to be configured for your email service.
+
+**Track Clicks** — Record which links each recipient clicked. Also requires webhooks. Useful for understanding engagement and click-through rates.
+
+*Note:* Enable tracking only if you've set up webhooks; otherwise, tracking won't work.
+
+#### Content (Email Body)
+Write the main email message that subscribers will receive. This can be plain text or HTML.
+
+The content supports the same placeholders as the subject line (first_name, last_name, email) plus any custom subscriber attributes you've defined.
+
+*Pro tip:* Keep your message scannable with short paragraphs, headers, and a clear call-to-action.
+
+---
+
+## Reviewing Your Campaign
+
+Once you've completed the form, click **Save and Continue**. Your campaign status becomes **Draft**, and you can review it on the preview page before sending.
+
+### Send a Test Email
+
+Before sending to your full subscriber list, always test your campaign:
+
+1. Enter an email address in the **Recipient** field (use your own email)
+2. Click **Send Test Email**
+3. Review how the email renders, check for typos, verify links work, and confirm placeholders are populated correctly
+
+This catches mistakes and ensures your campaign looks professional to recipients.
+
+---
+
+## Sending Your Campaign
+
+### Choose Your Recipients
+
+Select who receives this campaign:
+- **All subscribers** — Send to your entire subscriber database
+- **By tags** — Send only to subscribers with specific tags (e.g., "Premium Members", "Inactive Users")
+
+Using tags lets you segment your audience and send targeted campaigns.
+
+### Schedule Delivery
+
+Choose when the campaign sends:
+- **Send immediately** — Emails go out right away
+- **Schedule for later** — Pick a specific date and time for delivery
+
+Scheduling is useful for coordinating campaigns or sending when your audience is most active.
+
+### Choose Your Sending Behavior
+
+Select how messages are generated and dispatched:
+
+**Queue Draft**
+- Generates each email as a draft (one per subscriber)
+- Requires you to manually dispatch each email from the Messages section
+- **Best for:** Small subscriber lists, complex templates, or campaigns where you want to review each personalized message before sending
+- **Not recommended for:** Large subscriber lists (too time-consuming)
+
+**Send Automatically**
+- Generates and sends all emails automatically in the background
+- **Best for:** Most campaigns, especially large subscriber lists or time-sensitive announcements
+- **Requires:** Scheduled tasks and queue workers to be configured (see Configuration documentation)
+
+> **Troubleshooting:** If campaigns don't send, verify that scheduled tasks and queue workers are running on your server. See the [Configuration documentation](/docs/general/configuration) for setup details.
+
+---
+
+## After Your Campaign Sends
+
+### View Campaign Analytics
+
+Once a campaign has been sent, view performance metrics on the campaign analytics page:
+
+![Campaign Analytics Dashboard](/img/campaign-analytics.png)
+
+Track metrics like:
+- **Open rate** — Percentage of recipients who opened the email (if tracking enabled)
+- **Click rate** — Percentage of recipients who clicked links (if tracking enabled)
+- **Sent count** — Total emails successfully delivered
+- **Bounce rate** — Emails that failed to deliver
+
+Use these insights to improve future campaigns.
+
+---
+
+## Quick Reference: Campaign Checklist
+
+- [ ] Email service is configured and verified
+- [ ] Subscribers are added to your database
+- [ ] Template is created (optional but recommended)
+- [ ] Campaign name is descriptive
+- [ ] Subject line is clear and compelling
+- [ ] From name and email are correct
+- [ ] Content is proofread and links are tested
+- [ ] Recipients are correctly targeted (all or by tags)
+- [ ] Schedule is set correctly
+- [ ] Test email sent and reviewed
+- [ ] Sending behavior selected (Queue Draft or Send Automatically)
+
+---
+
+## Next Steps
+
+- Learn how to [manage subscribers](/docs/features/subscribers)
+- Explore [template creation](/docs/features/template) for advanced personalization
+- Set up [email service webhooks](/docs/features/email-services) for tracking
+- Configure [scheduled tasks and queue workers](/docs/general/configuration) for reliable campaign delivery

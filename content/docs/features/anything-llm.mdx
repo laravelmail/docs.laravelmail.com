@@ -1,0 +1,116 @@
+---
+title: AnythingLLM Integration
+description: Seamlessly integrate your Laravel Mail application with **AnythingLLM** using the **Model Context Protocol (MCP)**. This allows large language models (LLMs) to
+---
+
+# AnythingLLM Integration
+
+Seamlessly integrate your Laravel Mail application with **AnythingLLM** using the **Model Context Protocol (MCP)**. This allows large language models (LLMs) to interact directly with your application's data—subscribers, campaigns, reports, and more—making your email marketing smarter and more agentic.
+
+## Overview
+
+The integration functions as an **MCP Server** built directly into Laravel Mail. This server exposes specific "tools" that an MCP Client (like AnythingLLM) can call.
+
+- **Protocol**: Model Context Protocol (MCP) over Stdio (Standard Input/Output).
+- **Capabilities**:
+    - `search_subscribers`
+    - `get_subscriber_details`
+    - `list_campaigns`
+- **Location**: `mcp/server.php` in your project root.
+
+---
+
+## Configuration
+
+### Prerequisites
+1. **AnythingLLM Desktop** installed and running.
+2. **PHP 8.2+** available in your system path (if running locally) or accessible via Docker.
+3. **Laravel Mail** installed and configured.
+
+### Setting up in AnythingLLM
+
+1. Open **AnythingLLM Desktop**.
+2. Navigate to **Workspace Settings** > **Agent Capabilities** > **MCP Servers**.
+3. Create a **New Connection**:
+    - **Name**: `LaravelMail` (or any name you prefer)
+    - **Type**: `Stdio` (Standard IO)
+    - **Command**: `php` (or full path to php executable, e.g., `/usr/bin/php`)
+    - **Arguments**: `/path/to/your/project/mcp/server.php`
+
+> **Note for Docker Users**: If AnythingLLM is running outside Docker but your app is inside, you may need to wrap the command. For example, using `docker exec` to run the script inside your application container:
+> **Command**: `docker`
+> **Arguments**: `exec -i app.laravelmail.com php /var/www/mcp/server.php`
+
+4. Click **Connect/Save**.
+5. Once connected, AnythingLLM will list the available tools (`search_subscribers`, `list_campaigns`, etc.).
+
+---
+
+## Available Tools
+
+The following tools are currently exposed by the MCP server:
+
+### `search_subscribers`
+Finds subscribers by matching their email or name.
+- **Parameters**: `query` (string) - The search term.
+- **Returns**: A list of matching subscribers (ID, Name, Email).
+
+### `get_subscriber_details`
+Retrieves comprehensive details for a specific subscriber.
+- **Parameters**: `email` (string) - The subscriber's email address.
+- **Returns**: Full subscriber object including tags and metadata.
+
+### `list_campaigns`
+Fetches a list of the most recent campaigns.
+- **Parameters**: `limit` (int, default: 5) - Number of campaigns to return.
+- **Returns**: List of campaigns (ID, Name, Subject, Status, Created Date).
+
+---
+
+## Technical Details
+
+### The MCP Server (`mcp/server.php`)
+
+The server is a standalone PHP script that bootstraps the Laravel framework to access your models (`Subscriber`, `Campaign`, etc.). It listens on `STDIN` for JSON-RPC requests and writes responses to `STDOUT`.
+
+```php
+// mcp/server.php snippet
+while ($line = fgets(STDIN)) \&#123;
+    $request = json_decode($line, true);
+    // ... handles 'tools/list' and 'tools/call' ...
+\&#125;
+```
+
+### Extending the Integration
+
+You can easily add more tools by modifying `mcp/server.php`.
+
+1. **Define the Tool**: Add a new entry to the `tools/list` response.
+   ```php
+   [
+       'name' => 'create_campaign',
+       'description' => 'Create a new draft campaign',
+       'inputSchema' => [ ... ]
+   ]
+   ```
+
+2. **Handle the Call**: Add a case to the `tools/call` switch statement.
+   ```php
+   case 'create_campaign':
+       // Your logic to create a campaign using Laravel models
+       break;
+   ```
+
+---
+
+## Usage Example
+
+Once configured in AnythingLLM, you can chat with your agent naturally:
+
+> **User**: "Who are the last 5 subscribers matching 'john'?"
+>
+> **Agent** *(Using `search_subscribers`)*: "Here are the subscribers I found: John Doe (john@example.com), ..."
+
+> **User**: "What was the status of our last campaign?"
+>
+> **Agent** *(Using `list_campaigns`)*: "The last campaign 'Summer Sale' is currently 'Sent'."

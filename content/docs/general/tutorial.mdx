@@ -1,0 +1,534 @@
+---
+title: "\"Quickstart Guide: Send Your First Campaign\""
+description: This guide will walk you through sending your first email campaign with Laravel Mail Platform. You'll go from zero to sent in about 15 minutes.
+---
+
+# Quickstart Guide: Send Your First Campaign
+
+## Welcome
+
+This guide will walk you through sending your first email campaign with Laravel Mail Platform. You'll go from zero to sent in about 15 minutes.
+
+**Prerequisites:**
+- ✅ Laravel Mail Platform installed and configured
+- ✅ Your admin account created and logged in
+- ✅ Basic understanding of email marketing
+
+**What you'll do:**
+1. Set up an email service provider
+2. Add subscribers
+3. Create an email template (optional)
+4. Create a campaign
+5. Send it out
+
+Let's get started!
+
+---
+
+## Step 1: Set Up an Email Service (5 minutes)
+
+An email service is the provider that actually sends your emails. Laravel Mail Platform integrates with four major providers—choose the one that fits your needs.
+
+### Choose Your Email Service
+
+| Provider | Best For | Signup | Cost |
+|----------|----------|--------|------|
+| **SendGrid** | Marketing campaigns; great UI | [sendgrid.com](https://sendgrid.com) | Free tier (100/day) |
+| **Postmark** | Transactional emails; best support | [postmarkapp.com](https://postmarkapp.com) | Pay-as-you-go ($1.50 per 1k) |
+| **Mailgun** | Developers; flexible; API-first | [mailgun.com](https://mailgun.com) | Free tier available |
+| **Amazon SES** | High volume; cheapest at scale | [aws.amazon.com/ses](https://aws.amazon.com/ses) | $0.10 per 1k emails |
+
+**Quick recommendation:** If you're new to email marketing, **start with SendGrid**—it's beginner-friendly and has a generous free tier.
+
+> ⚠️ **Important:** Postmark is for transactional email only (password resets, confirmations). Don't use it for marketing campaigns per their Terms of Service.
+
+### Add Email Service to Laravel Mail Platform
+
+1. Log in to Laravel Mail Platform
+2. Click **Settings** → **Email Services** in sidebar
+3. Click **+ Add Email Service** button
+4. Select your chosen provider from dropdown
+5. Enter your credentials:
+- **API key** (or username/password)
+- **From email address** (must be verified in your email service)
+- **Optional:** Friendly name
+
+6. Click **Test Connection**
+- Sends test email to verify it works
+- Check your inbox for confirmation
+
+7. Click **Save**
+
+**Need detailed setup for your provider?** See [Email Services Guide](/docs/features/email-services) for step-by-step instructions for each provider.
+
+### Verify Your Sending Domain (Important!)
+
+Before you can send emails, your email service requires you to verify that you own the domain. This varies by provider:
+
+**SendGrid:** Add DNS records to verify domain
+**Postmark:** Verify sender email address
+**Mailgun:** Add DNS records to verify domain
+**Amazon SES:** Verify sender email or domain
+
+Typically takes 5-30 minutes. Check your email service's documentation for exact steps.
+
+---
+
+## Step 2: Add Subscribers (5 minutes)
+
+Subscribers are the people who will receive your campaigns. You need at least a few to test with.
+
+### Option A: Add One Subscriber Manually (Quickest)
+
+1. Click **Subscribers** in sidebar
+2. Click **+ New Subscriber**
+3. Enter:
+- **Email:** Their email address
+- **First Name:** (optional but recommended for personalization)
+- **Last Name:** (optional)
+- **Subscribe:** Toggle ON (must be checked)
+4. Click **Save**
+
+Repeat this 2-3 times to add test subscribers.
+
+### Option B: Import CSV (For Larger Lists)
+
+If you already have a list of subscribers:
+
+1. Click **Subscribers** in sidebar
+2. Click **⋯** (menu) → **Import Subscribers**
+3. Prepare your CSV file with columns: `email`, `first_name`, `last_name`
+
+**Example CSV:**
+```
+email,first_name,last_name
+john@example.com,John,Smith
+sarah@example.com,Sarah,Jones
+   ```
+
+4. Click **Browse** and select your CSV
+5. Click **Upload**
+
+See [Subscribers Guide](/docs/features/subscribers) for detailed CSV instructions.
+
+### Option C: Add via API (For Automation)
+
+If you're integrating with your application:
+
+```php
+POST /api/subscribers
+\&#123;
+  "email": "user@example.com",
+  "first_name": "John",
+  "last_name": "Smith"
+\&#125;
+```
+
+See [Subscribers Guide](/docs/features/subscribers) for full details.
+
+### Test Subscribers
+
+For initial testing, add your own email and a few test addresses:
+- Your email (your-email@example.com)
+- Test account (test@example.com)
+- This helps you see what emails actually look like
+
+---
+
+## Step 3: Create a Template (Optional, 5 minutes)
+
+Templates provide consistent branding for all campaigns. You don't need one to get started, but they save time.
+
+### Why Create a Template?
+
+- **Consistent branding** — Same header/footer on all emails
+- **Faster campaigns** — Just write content, template handles design
+- **Professional look** — Built-in layouts work in all email clients
+- **Reusable** — Use same template for multiple campaigns
+
+### Create Your First Template
+
+1. Click **Templates** in sidebar
+2. Click **+ New Template**
+3. Enter **Template Name:** (e.g., "Newsletter Template")
+4. In the HTML editor, paste this simple template:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body \&#123; font-family: Arial, sans-serif; margin: 0; \&#125;
+        .container \&#123; max-width: 600px; margin: 0 auto; padding: 20px; \&#125;
+        .header \&#123; background: #007bff; color: white; padding: 20px; text-align: center; \&#125;
+        .footer \&#123; background: #f8f9fa; border-top: 1px solid #ddd; padding: 15px; margin-top: 30px; font-size: 12px; color: #666; text-align: center; \&#125;
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome, \&#123;\\&#123;first_name\&#125;\\&#125;!</h1>
+        </div>
+
+        <!-- Campaign content goes here -->
+        \&#123;\\&#123;content\&#125;\\&#125;
+
+        <div class="footer">
+            <p>© 2024 My Company. All rights reserved.</p>
+            <p><a href="\&#123;\\&#123;unsubscribe_url\&#125;\\&#125;">Unsubscribe</a> | <a href="\&#123;\\&#123;webview_url\&#125;\\&#125;">View in Browser</a></p>
+        </div>
+    </div>
+</body>
+</html>
+```
+
+5. Click **Save**
+
+**What does this do?**
+- `\&#123;\\&#123;first_name\&#125;\\&#125;` — Automatically inserts subscriber's first name
+- `\&#123;\\&#123;content\&#125;\\&#125;` — Placeholder for your campaign message (required)
+- `\&#123;\\&#123;unsubscribe_url\&#125;\\&#125;` — Unsubscribe link (required by law)
+- `\&#123;\\&#123;webview_url\&#125;\\&#125;` — View in browser link
+
+### Or: Import Pre-Built Templates
+
+Laravel Mail Platform includes professional templates you can use immediately:
+
+```bash
+php artisan app:import-templates
+```
+
+This downloads free templates you can use as-is or customize.
+
+**Want to learn more about templates?** See [Templates Guide](/docs/features/template).
+
+---
+
+## Step 4: Create Your Campaign (5 minutes)
+
+Now you'll create and prepare your first campaign.
+
+### Create Campaign
+
+1. Click **Campaigns** in sidebar
+2. Click **+ New Campaign**
+3. Fill in the form:
+
+**Campaign Name:** (internal name, e.g., "Welcome to our Newsletter")
+
+**Subject Line:** (what subscribers see, e.g., "Welcome, \&#123;\\&#123;first_name\&#125;\\&#125;!")
+
+**From Name:** (e.g., "John from Acme Co.")
+
+**From Email:** (verified email from Step 1)
+
+**Email Service:** (select the one you configured in Step 1)
+
+**Template:** (optional; select template from Step 3, or skip)
+
+4. In **Content** section, write your message:
+
+```
+Hi \&#123;\\&#123;first_name\&#125;\\&#125;,
+
+Welcome to our newsletter! Here's what's new this month:
+
+- Feature 1: Something exciting
+- Feature 2: Another great thing
+- Feature 3: One more thing
+
+Check out our blog for more updates!
+
+Best regards,
+The Team
+```
+
+5. Click **Save and Continue**
+
+Your campaign is now in **Draft** status.
+
+### Preview Your Campaign
+
+Before sending, preview exactly what subscribers will see:
+
+1. On campaign page, look for **Preview** section
+2. Select a subscriber from dropdown
+3. Click **Preview**
+4. See how personalization looks (names should appear correctly)
+5. Verify links work
+6. Check formatting
+
+---
+
+## Step 5: Send Your Campaign (2 minutes)
+
+Time to send it out!
+
+### Review Your Campaign
+
+On the campaign preview page, verify:
+
+- ✅ Subject line looks good
+- ✅ Content is correct
+- ✅ Links work
+- ✅ Personalization shows correctly (names appear)
+
+### Send Test Email First (Recommended)
+
+Before sending to everyone, send to yourself:
+
+1. Find **Test Email** section
+2. Enter your email address
+3. Click **Send Test Email**
+4. Check your email (including spam folder)
+5. Verify it looks perfect
+
+### Choose Recipients
+
+1. In **Recipients** section, choose:
+- **All Subscribers** — Send to everyone
+- **Specific Tags** — Send only to certain groups (if you've set up tags)
+
+2. Verify the number shown (e.g., "Will be sent to 5 subscribers")
+
+### Choose Send Timing
+
+1. In **Schedule** section:
+- **Send immediately** — Goes out now (recommended for first campaign)
+- **Schedule for later** — Choose date/time to send
+
+2. For first campaign, choose **Send immediately**
+
+### Choose Sending Behavior
+
+1. In **Sending Behaviour** section, choose:
+
+**Option A: Send Automatically** (Recommended)
+- Messages sent immediately when you confirm
+- Best for: Most campaigns
+- Good for: Large subscriber lists
+
+**Option B: Queue Draft**
+- Creates draft for each subscriber
+- You must manually send each one
+- Best for: Small lists where you want to review each email
+- Not recommended for: Lists over 1,000 subscribers
+
+2. For first campaign, choose **Send Automatically**
+
+### Send!
+
+1. Review all settings one more time
+2. Click **Send Campaign** button
+3. Confirm when prompted
+4. Campaign is sent! 🎉
+
+---
+
+## Verify It Worked
+
+After sending, verify your campaign went out:
+
+### Check Your Email
+
+1. Go to your email inbox (including spam folder)
+2. Look for your campaign email
+3. Verify:
+- Subject line correct
+- Names personalized correctly
+- Links work
+- Footer with unsubscribe link present
+
+### Check Campaign Status
+
+1. Go to **Campaigns** in sidebar
+2. Find your campaign in list
+3. Should show status: **Sent**
+4. Click on campaign to see:
+- Number sent
+- Delivery status
+- Opens/clicks (if tracking enabled)
+- Any bounces or failures
+
+### Check Messages
+
+1. Go to **Messages** in sidebar
+2. Should see your campaign emails listed
+3. Click on one to see delivery details
+4. Verify status is **Sent** or **Delivered**
+
+---
+
+## Congratulations! 🎉
+
+You've successfully sent your first campaign with Laravel Mail Platform!
+
+### What's Next?
+
+Now that you've completed the basics, here are some next steps:
+
+**Expand your subscriber list:**
+- Import more subscribers from CSV
+- Set up web form to capture signups
+- Use API to sync with your application
+
+**Organize with tags:**
+- Create tags for different audience segments
+- Target campaigns to specific tags
+- Example: "Newsletter" tag, "Premium Users" tag
+
+**Build more templates:**
+- Create templates for different email types
+- Promotional template, newsletter template, etc.
+- Use templates for consistent branding
+
+**Create more campaigns:**
+- Monthly newsletter
+- Product announcements
+- Customer updates
+- Promotional campaigns
+
+**Track performance:**
+- Monitor open rates
+- Track click-through rates
+- Monitor bounce rates
+- A/B test subject lines
+
+**Set up automation:**
+- Send campaigns on schedule (e.g., every Monday)
+- Segment campaigns by engagement
+- Re-engagement campaigns for inactive users
+
+---
+
+## Detailed Documentation
+
+For detailed information on each feature:
+
+- **Email Services** — [Email Services Guide](/docs/features/email-services)
+- **Subscribers** — [Subscribers Guide](/docs/features/subscribers)
+- **Tags** — [Tags Guide](/docs/features/tags)
+- **Templates** — [Templates Guide](/docs/features/template)
+- **Campaigns** — [Campaigns Guide](/docs/features/campaigns)
+- **Messages** — [Messages Guide](/docs/features/messages)
+
+---
+
+## Troubleshooting
+
+### "Campaign won't send"
+
+**Check:**
+- [ ] Email service is configured and tested
+- [ ] Subscribers exist and are subscribed
+- [ ] Campaign content is filled in
+- [ ] Email service account is active (not suspended)
+
+**Fix:**
+- Verify email service credentials in Settings
+- Check queue workers are running (if using queues)
+- Review logs for error messages
+
+### "Emails going to spam"
+
+**Why this happens:**
+- New domain reputation
+- Missing SPF/DKIM records
+- Content triggers spam filters
+- Unsubscribe link missing
+
+**How to fix:**
+- Check email service's spam monitoring
+- Set up SPF, DKIM, DMARC records
+- Include unsubscribe link in template
+- Monitor bounce rates
+
+### "Personalization not working"
+
+**Problem:** `\&#123;\\&#123;first_name\&#125;\\&#125;` showing as text in email
+
+**Causes:**
+- Tag used in campaign content instead of template
+- Subscriber doesn't have first name set
+- Template not selected
+
+**Fix:**
+- Put tags in template (inside `\&#123;\\&#123;content\&#125;\\&#125;` area works too)
+- Add first names to subscribers
+- Make sure template is selected when creating campaign
+
+### "Test email never arrived"
+
+**Check:**
+- [ ] Email address is correct (no typos)
+- [ ] Check spam/junk folder
+- [ ] Email service account is active
+- [ ] From email address is verified
+
+**Try:**
+- Use different test email address
+- Verify from address in email service
+- Check email service account status
+
+---
+
+## Tips for Success
+
+### Email Best Practices
+
+- **Always include unsubscribe link** — Required by law (CAN-SPAM, GDPR)
+- **Use clear subject lines** — Be specific, avoid spam trigger words
+- **Test before sending** — Send test email to yourself
+- **Personalize when possible** — Use first names to increase engagement
+- **Keep emails short** — Most emails read on mobile
+- **Single call-to-action** — One main thing you want reader to do
+
+### Frequency Guidelines
+
+- **Too often:** Daily emails to inactive users (leads to unsubscribes)
+- **About right:** Weekly newsletter, monthly promotions
+- **Balance:** Regular enough to stay relevant, not so often to annoy
+
+### Compliance
+
+- **Always include unsubscribe link** — CAN-SPAM law requires it
+- **Honor unsubscribe requests** — Remove within 10 business days
+- **Don't buy email lists** — Get permission first (double opt-in preferred)
+- **Keep records** — Document how you got each subscriber's consent
+
+### Performance
+
+- **Monitor open rate** — Below 15% may indicate list quality issues
+- **Monitor bounce rate** — Should be below 3%
+- **Monitor unsubscribe rate** — A few percent is normal
+- **Clean list regularly** — Remove bounces and long-inactive users
+
+---
+
+## Getting Help
+
+**Need more information?**
+- Check [full documentation](/docs)
+- Review [Configuration Guide](/docs/general/configuration)
+- Check email service provider's docs for API key help
+
+**Still stuck?**
+- Review logs for error messages
+- Try the troubleshooting section above
+- Contact support
+
+---
+
+## Recap: The 5 Steps
+
+| Step | Time | What You Do |
+|------|------|-----------|
+| 1. Email Service | 5 min | Choose provider, add credentials, verify domain |
+| 2. Subscribers | 5 min | Add test subscribers manually or via CSV |
+| 3. Template | 5 min | Create template or import pre-built ones (optional) |
+| 4. Campaign | 5 min | Create campaign, write content, preview |
+| 5. Send | 2 min | Send test email, then send to all subscribers |
+
+**Total time: ~25 minutes from start to first campaign sent** ✅
+
+Now go send something awesome! 🚀

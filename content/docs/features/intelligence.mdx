@@ -1,0 +1,77 @@
+---
+title: Email Intelligence (OSINT)
+description: Laravel Mail Platform includes a built-in **Email Intelligence** system powered by **SpiderFoot**. This feature allows you to perform Open Source Intelligence (
+---
+
+# Email Intelligence (OSINT)
+
+Laravel Mail Platform includes a built-in **Email Intelligence** system powered by **SpiderFoot**. This feature allows you to perform Open Source Intelligence (OSINT) scans on email addresses and domains to gather publicly available information about your subscribers.
+
+## Overview
+
+Email Intelligence helps you understand your audience better by identifying:
+- **Social Media Profiles**: Linked accounts on external sites.
+- **Data Breaches**: Whether an email address has been compromised in known data leaks.
+- **Affiliations**: Connections to other domains or internet names.
+- **Blacklists**: Whether an IP address or domain associated with a subscriber is flagged for spam or malicious activity.
+
+---
+
+## How it Works
+
+The system integrates with a **SpiderFoot** instance (via API) to orchestrate complex scans. When you start a scan, the application:
+1. Dispatches a scan request to the SpiderFoot API.
+2. Monitors the scan status.
+3. Retrieves and categorizes the findings.
+4. Stores the results for your review within the dashboard.
+
+---
+
+## Using Email Intelligence
+
+### Starting a New Scan
+1. Navigate to **Intelligence** in the sidebar.
+2. Click **New Scan**.
+3. Enter the **Target** (e.g., an email address like `john@example.com` or a domain like `example.com`).
+4. Click **Start Scan**.
+
+The scan will now run in the background. Depending on the target and the modules enabled in your SpiderFoot instance, this can take anywhere from a few minutes to an hour.
+
+### Reviewing Results
+Once a scan is complete (or while it's in progress), you can click on the scan in your list to view the results. Results are categorized into several types:
+
+- **Entity**: Direct findings like email addresses, account names, and physical addresses.
+- **Descriptor**: Metadata about a finding, such as "Hacked" or "Blacklisted".
+- **Internal**: System-level events for debugging.
+
+### Common Findings
+| Event ID | Description |
+|----------|-------------|
+| `ACCOUNT_EXTERNAL_OWNED` | Found a social media or web account belonging to the target. |
+| `EMAILADDR_COMPROMISED` | This email address was found in a past data breach. |
+| `BLACKLISTED_IPADDR` | The subscriber's mail server or IP is on a blacklist. |
+| `AFFILIATE_EMAILADDR` | Found another email address linked to the target. |
+
+---
+
+## Configuration
+
+To use this feature, you must have a SpiderFoot server running and accessible by your Laravel Mail application.
+
+### Docker Support
+If you are using the provided `docker-compose.yaml`, ensure your application container has network access to your SpiderFoot instance.
+
+### Environment Variables
+Add these to your `.env` file to configure the connection:
+
+```env
+SPIDERFOOT_URL=http://spiderfoot:5001
+SPIDERFOOT_API_KEY=your_api_key_here
+```
+
+---
+
+## Best Practices
+- **Respect Privacy**: Only use OSINT tools for legitimate business purposes, such as verifying leads or protecting against fraud.
+- **Batch Scanning**: Use the **Import** feature to scan multiple targets at once by uploading a CSV.
+- **Monitor API Limits**: If using third-party modules within SpiderFoot (e.g., HaveIBeenPwned), be aware of their respective API key limits and costs.

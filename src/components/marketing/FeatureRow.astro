@@ -1,0 +1,104 @@
+---
+import { Icon } from "astro-icon/components";
+
+interface Props {
+    title: string;
+    subtitle?: string;
+    description: string;
+    benefits: string[];
+    tagline: string;
+    image?: string;
+    reverse?: boolean;
+    icon?: string;
+}
+
+const {
+    title,
+    subtitle,
+    description,
+    benefits,
+    tagline,
+    reverse = false,
+    icon = "mail",
+} = Astro.props;
+---
+
+<section class={`py-16 md:py-24 ${reverse ? "bg-muted/30" : ""}`}>
+    <div class="mx-auto max-w-7xl px-6">
+        <div
+            class={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"} items-center gap-12 lg:gap-20`}
+        >
+            <div class="flex-1 space-y-6">
+                <div class="space-y-2">
+                    {
+                        subtitle && (
+                            <p class="text-primary text-sm font-bold tracking-tight uppercase">
+                                {subtitle}
+                            </p>
+                        )
+                    }
+                    <h2 class="text-foreground text-3xl font-extrabold tracking-tight md:text-4xl">
+                        {title}
+                    </h2>
+                </div>
+
+                <p class="text-muted-foreground text-lg leading-relaxed">
+                    {description}
+                </p>
+
+                <ul class="space-y-4">
+                    {
+                        benefits.map((benefit) => (
+                            <li class="flex items-start gap-3">
+                                <div class="bg-primary/10 mt-1 rounded-full p-1">
+                                    <Icon name="check" class="text-primary h-4 w-4" />
+                                </div>
+                                <span class="text-foreground/80 font-medium">{benefit}</span>
+                            </li>
+                        ))
+                    }
+                </ul>
+
+                <p class="text-muted-foreground border-border/50 border-t pt-4 font-mono text-sm">
+                    {
+                        tagline.split(" • ").map((tag, i) => (
+                            <>
+                                <span class="hover:text-primary cursor-default transition-colors">
+                                    {tag}
+                                </span>
+                                {i < tagline.split(" • ").length - 1 && (
+                                    <span class="mx-2 opacity-30">•</span>
+                                )}
+                            </>
+                        ))
+                    }
+                </p>
+            </div>
+
+            <div class="w-full max-w-xl flex-1">
+                <div
+                    class="border-border group relative aspect-square overflow-hidden rounded-2xl border shadow-2xl"
+                >
+                    <div
+                        class="from-primary/20 absolute inset-0 bg-gradient-to-br to-transparent transition-opacity group-hover:opacity-0"
+                    >
+                    </div>
+                    <div class="bg-muted/20 absolute inset-0 flex items-center justify-center p-12">
+                        <Icon
+                            name={icon}
+                            class="h-1/2 w-1/2 opacity-20 transition-transform duration-500 group-hover:scale-110"
+                        />
+                    </div>
+                    <!-- Placeholder for real image if available -->
+                    <div
+                        class="absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/60 to-transparent p-6 text-white drop-shadow-md"
+                    >
+                        <span class="text-xs font-bold tracking-widest uppercase opacity-80"
+                            >{title} Platform View</span
+                        >
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

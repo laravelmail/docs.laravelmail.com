@@ -1,0 +1,344 @@
+---
+title: Deployment & Installation
+description: "\"Laravel Mail Platform requires the following to run:\""
+---
+
+# Deployment & Installation
+ 
+## Docker Deployment (Recommended)
+ 
+The recommended way to deploy Laravel Mail Platform is using Docker. 
+This ensures all dependencies and performance optimizations are correctly configured.
+ 
+## System Requirements
+
+Laravel Mail Platform requires the following to run:
+
+| Requirement | Minimum Version | Notes |
+|-------------|-----------------|-------|
+| **PHP** | 8.4+ | Modern version with required extensions (see below) |
+| **Git** | Any recent version | For cloning the repository |
+| **Composer** | 2.0+ | PHP dependency manager ([install here](https://getcomposer.org/)) |
+| **Database** | See below | Choose one database system |
+
+### Supported Databases
+
+Choose **one** of the following database systems:
+
+- **MySQL** — Version 5.7 or higher (8.0+ recommended)
+- **PostgreSQL** — Version 9.4 or higher (12+ recommended)
+- **SQLite** — Version 3.33 or higher (3.39+ recommended)
+
+**Database choice tips:**
+- **MySQL**: Most common choice; widely supported by hosting providers
+- **PostgreSQL**: More robust for large datasets; better JSON support
+- **SQLite**: Good for development/testing; not recommended for production with multiple concurrent users
+
+### PHP Extensions
+
+Laravel Mail Platform requires the following PHP extensions (most come standard):
+
+- `curl`
+- `json`
+- `openssl`
+- `pdo`
+- `mbstring`
+- `tokenizer`
+- `xml`
+- `fileinfo`
+
+Run `php -m` to see which extensions are currently installed.
+
+---
+
+## Checking Your Setup
+
+### Verify Prerequisites
+
+Before proceeding, verify each requirement is installed:
+
+```bash
+# Check PHP version
+php --version
+
+# Check Composer is installed
+composer --version
+
+# Check Git is installed
+git --version
+
+# Check database client (MySQL example)
+mysql --version
+```
+
+If any command fails, install the missing software first.
+
+### Verify PHP Extensions
+
+Check if required extensions are available:
+
+```bash
+php -m | grep -E 'curl|json|openssl|pdo|mbstring|tokenizer|xml|fileinfo'
+```
+
+Missing extensions? This depends on your environment:
+
+**Ubuntu/Debian:**
+```bash
+sudo apt-get install php8.3-curl php8.3-json php8.3-openssl php8.3-pdo php8.3-mbstring php8.3-tokenizer php8.3-xml php8.3-fileinfo
+```
+
+**macOS (Homebrew):**
+```bash
+brew install php@8.3
+```
+
+**Windows:**
+Enable extensions in your `php.ini` file by uncommenting extension lines, or use a pre-configured PHP distribution like XAMPP.
+
+---
+
+## Installation Steps
+
+### Step 1: Buy the Repository
+
+Buy Laravel Mail Platform from the [Laravel Mail](https://laravelmail.com) website.
+
+### Step 2: Install Dependencies
+
+Navigate to the project root and install all PHP dependencies using Composer:
+
+```bash
+composer install
+```
+
+Composer will download and install Laravel Mail Platform and all required packages. This may take a few minutes depending on your connection speed.
+
+> **Tip:** If you encounter permission errors, you may need to run with `sudo` (Linux/macOS) or use an administrator terminal (Windows).
+
+### Step 3: Configure Your Environment
+
+After dependencies are installed, proceed to the [Configuration & Setup Guide](/docs/general/configuration) to:
+
+- Create your `.env` file
+- Generate an encryption key
+- Configure your database connection
+- Set up queue workers
+- Configure cron jobs
+- Set up email services
+
+> **Important:** Do not start the server until you've completed the configuration steps. The application will not work without proper `.env` settings and database migrations.
+
+---
+
+## Web Server Setup
+
+Laravel Mail Platform requires a web server to serve the application. The web server must be configured to point to the `public` directory of your installation.
+
+### Why the `public` Directory?
+
+The `public` directory contains only the files that should be directly accessible from the web (CSS, JavaScript, images). All sensitive application code remains outside the web root, improving security.
+
+### Popular Web Server Configurations
+
+#### Nginx
+
+Create a new server block in your nginx configuration:
+
+```nginx
+server \&#123;
+    listen 80;
+    server_name campaigns.example.com;
+
+    root /var/www/campaigns.example.com/public;
+    index index.php index.html index.htm;
+
+    location / \&#123;
+        try_files $uri $uri/ /index.php?$query_string;
+    \&#125;
+
+    location ~ \.php$ \&#123;
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    \&#125;
+\&#125;
+```
+
+Save this to `/etc/nginx/sites-available/campaigns.conf`, enable it, and reload:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/campaigns.conf /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+#### Apache
+
+Enable the `mod_rewrite` module and create a virtual host:
+
+```bash
+sudo a2enmod rewrite
+```
+
+Create a virtual host configuration (e.g., `/etc/apache2/sites-available/campaigns.conf`):
+
+```apache
+<VirtualHost *:80>
+    ServerName campaigns.example.com
+    DocumentRoot /var/www/campaigns.example.com/public
+
+    <Directory /var/www/campaigns.example.com/public>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog $\&#123;APACHE_LOG_DIR\&#125;/campaigns-error.log
+    CustomLog $\&#123;APACHE_LOG_DIR\&#125;/campaigns-access.log combined
+</VirtualHost>
+```
+
+Enable the site and reload:
+
+```bash
+sudo a2ensite campaigns.conf
+sudo apache2ctl configtest
+sudo systemctl reload apache2
+```
+
+#### Local Development (Octane / RoadRunner)
+ 
+For development, we use Laravel Octane with RoadRunner for high performance. This is already configured in the Docker setup.
+
+```bash
+# Start the server (inside Docker)
+php artisan octane:start --server=roadrunner --host=0.0.0.0 --port=13000
+```
+
+#### Local Development (Traditional)
+ 
+If not using Docker, you can use Laravel's built-in server:
+
+```bash
+php artisan serve
+```
+
+### Verify Your Web Server Setup
+
+After configuring your web server, verify it's working:
+
+1. Create a test file in `/var/www/campaigns.example.com/public/test.txt` with some content
+2. Navigate to `https://campaigns.example.com/test.txt` in your browser
+3. If you see the file content, your web server is configured correctly
+4. Delete the test file when done
+
+---
+
+## Installation Verification
+
+### Run the Setup Command (Optional)
+
+Laravel Mail Platform includes an interactive setup command that automates configuration:
+
+```bash
+php artisan setup
+```
+
+This command will:
+- Verify system requirements
+- Create your `.env` file
+- Generate an encryption key
+- Configure database settings
+- Run migrations
+- Create an admin user
+- Set up basic email services
+
+> **Note:** You can also configure everything manually following the [Configuration Guide](/docs/general/configuration).
+
+### Test Your Installation
+
+After setup, verify everything is working:
+
+1. Navigate to your domain in a browser
+2. Log in with your configured credentials
+3. Try accessing the Campaigns page
+4. Verify no errors appear in `storage/logs/laravel.log`
+
+---
+
+## Common Installation Issues
+
+### "Composer command not found"
+Composer is not installed or not in your system PATH. [Install Composer](https://getcomposer.org/download/) and verify with `composer --version`.
+
+### "PHP version does not satisfy requirement"
+You have an older version of PHP installed. Install PHP 8.3+:
+- **Ubuntu:** `sudo apt-get install php8.3-cli`
+- **macOS:** `brew install php@8.3`
+- **Windows:** Download from [php.net](https://www.php.net/downloads)
+
+### "permission denied" or "cannot write to directory"
+The web server user doesn't have permission to write to required directories. Fix this:
+
+```bash
+sudo chown -R www-data:www-data /var/www/campaigns.example.com
+sudo chmod -R 755 /var/www/campaigns.example.com
+sudo chmod -R 775 /var/www/campaigns.example.com/storage
+sudo chmod -R 775 /var/www/campaigns.example.com/bootstrap/cache
+```
+
+Replace `www-data` with your web server user (could be `www`, `apache`, `nginx`, etc.).
+
+### "SQLSTATE[HY000]: General error: 1030 Got error"
+Usually a database connection problem. Verify:
+- Database server is running: `sudo systemctl status mysql` (or `postgres`, etc.)
+- Connection credentials are correct in `.env`
+- Database user has permission to access the specified database
+
+### "504 Bad Gateway" or "502 Bad Gateway"
+Your PHP application or queue workers are not running. Verify:
+- PHP-FPM is running: `sudo systemctl status php8.3-fpm`
+- Queue workers are running: `php artisan queue:work --queue=message-dispatch`
+- Check logs in `storage/logs/laravel.log`
+
+### "Class not found" or "Cannot find database"
+Migrations haven't been run or failed. Run:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+---
+
+## Next Steps
+
+✅ **Installation complete?** Proceed to [Configuration & Setup](/docs/general/configuration) to finish configuring your environment.
+
+**Installing on a specific platform?**
+- [Deploy on Ubuntu/Debian](#nginx)
+- [Deploy on CentOS/RHEL](#nginx)
+- [Deploy with Docker](/docs/docker)
+- [Deploy on shared hosting](/docs/shared-hosting)
+
+**Need help?**
+- Check the [Troubleshooting Guide](/docs/troubleshooting)
+- Review [Laravel Deployment Documentation](https://laravel.com/docs/deployment) for detailed server setup
+- Contact support if you're stuck
+
+---
+
+## Production Deployment Considerations
+
+Before deploying to production, also consider:
+
+- **SSL/TLS certificates** — Use HTTPS (Let's Encrypt is free)
+- **Backups** — Set up automated database backups
+- **Monitoring** — Monitor server resources and logs
+- **Security** — Keep PHP, web server, and database updated
+- **Performance** — Use Redis for queues, enable caching
+- **Email services** — Configure with production credentials
+- **Logging** — Monitor `storage/logs/` for errors
+
+See the [Configuration Guide](/docs/general/configuration) for detailed security and performance recommendations.

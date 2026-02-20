@@ -1,0 +1,921 @@
+---
+title: Workflows
+description: Workflows automate email marketing tasks by connecting triggers, tasks, and data together in a visual editor. Instead of manually performing repetitive actions,
+---
+
+# Workflows
+
+## What Are Workflows?
+
+Workflows automate email marketing tasks by connecting triggers, tasks, and data together in a visual editor. Instead of manually performing repetitive actions, you define a workflow once and it executes automatically.
+
+**Real-world examples:**
+
+- **Welcome email:** When a new user signs up (trigger) → send welcome email (task)
+- **Customer notification:** When an order is placed (trigger) → send confirmation email (task) → save to file (task)
+- **Report generation:** On schedule (trigger) → generate PDF (task) → send via email (task) → notify Slack (task)
+
+**Key concepts:**
+- **Trigger** — Event that starts the workflow
+- **Tasks** — Individual actions that execute in sequence
+- **DataBus** — Passes information between tasks
+- **Visual editor** — Drag-and-drop interface (no code required)
+
+---
+
+## Getting Started
+
+### Access Workflows
+
+Workflows are built into Laravel Mail Platform and ready to use immediately:
+
+1. Log in to your application
+2. Navigate to `/workflows`
+3. You'll see the workflow builder interface
+4. Start creating your first workflow
+
+### Workflow Basics
+
+Every workflow has this structure:
+
+```
+Trigger (Start Event)
+    ↓
+Task 1 (First Action)
+    ↓
+Task 2 (Second Action)
+    ↓
+Task 3 (Third Action)
+    ↓
+Complete
+```
+
+**Key principles:**
+- Workflows start with exactly **one trigger**
+- Tasks execute in the **order you set** them
+- Information flows through the **DataBus** between tasks
+- Each task is independent (can be reused in other workflows)
+
+---
+
+## Triggers
+
+A trigger is the event that starts your workflow. Triggers define **when** and **how** your workflow executes.
+
+### Available Triggers
+
+#### Observer Trigger
+
+Watch Eloquent model events and automatically start workflows.
+
+**How it works:**
+- Monitors database model changes (created, updated, deleted, etc.)
+- When event occurs, passes the model to workflow
+- Workflow executes automatically
+
+**Setup:**
+
+Add `WorkflowObservable` trait to your Eloquent model:
+
+```php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use LaravelMail\Workflows\Traits\WorkflowObservable;
+
+class User extends Model
+\&#123;
+    use WorkflowObservable;
+\&#125;
+```
+
+**Example workflow:**
+
+```
+Trigger: User model created
+    ↓
+Task: Send welcome email
+    ↓
+Task: Add to "New Users" segment
+```
+
+When a new user is created in database, this workflow runs automatically.
+
+**Supported events:**
+- `created` — Model was created
+- `updated` — Model was updated
+- `deleted` — Model was deleted
+- `restored` — Deleted model was restored
+- `saved` — Model was saved (created or updated)
+
+#### Button Trigger
+
+Render clickable buttons in your interface that execute workflows when clicked.
+
+**How it works:**
+- Display button in frontend/UI
+- User clicks button
+- Workflow executes with passed data (optional model)
+- Button can include custom styling/classes
+
+**Rendering buttons:**
+
+**Option 1: By Workflow Name**
+
+```php
+\&#123;!! LaravelMail\Workflows\Triggers\ButtonTrigger::renderButtonByName(
+    'workflow-name',
+    $model  // optional: passes model to workflow
+) !!\&#125;
+```
+
+**Option 2: By Workflow ID**
+
+```php
+\&#123;!! LaravelMail\Workflows\Triggers\ButtonTrigger::renderButtonByWorkflowId(
+    workflow_id,
+    $model  // optional
+) !!\&#125;
+```
+
+**Option 3: By Category**
+
+Render all buttons in a category:
+
+```php
+\&#123;!! the42coders\Workflows\Triggers\ButtonTrigger::renderButtonsByCategory(
+    'category-name',
+    $model  // optional
+) !!\&#125;
+```
+
+**Customize button appearance:**
+
+You can modify button styling by publishing the blade template:
+
+```bash
+php artisan vendor:publish --tag=workflow-buttons
+```
+
+Then edit the published view to customize colors, text, classes, etc.
+
+**Example button workflow:**
+
+```
+Trigger: User clicks "Send Welcome Email" button
+    ↓
+Task: Send email to selected user
+    ↓
+Task: Log activity
+    ↓
+Task: Notify admin via Slack
+```
+
+#### Triggers Coming Soon
+
+Additional triggers in development:
+- **Schedule Trigger** — Run on schedule (daily, weekly, etc.)
+- **Webhook Trigger** — Triggered by external webhook
+- **Email Event Trigger** — Triggered by email opens/clicks
+- **API Trigger** — Called from API endpoint
+
+---
+
+## Tasks
+
+Tasks are individual actions that execute in sequence. Each task performs one specific job and can use data from previous tasks via the DataBus.
+
+### All Available Tasks
+
+| Task | Purpose | Use Case |
+|------|---------|----------|
+| **ChangeModel** | Modify Eloquent model in memory | Update user properties before saving |
+| **DomPDF** | Generate PDF from HTML | Create invoice or report PDF |
+| **Execute** | Run shell commands | Run backups, generate files |
+| **HtmlInput** | Rich text with Blade rendering | Create dynamic email content |
+| **HttpStatus** | Check HTTP status of URL | Monitor endpoints, verify links |
+| **PregReplace** | Find/replace using regex | Transform text data |
+| **LoadModel** | Load model from database | Fetch related user/order data |
+| **SaveFile** | Save data to file | Create logs, exports, archives |
+| **SaveModel** | Save model to database | Persist changes |
+| **SendMail** | Send email | Send notifications, confirmations |
+| **SendSlackMessage** | Send Slack notification | Alert team, post updates |
+
+### Task Details
+
+#### ChangeModel
+
+Modify an Eloquent model's attributes in memory (without saving to database).
+
+**Use cases:**
+- Prepare model for next task
+- Update properties before saving
+- Transform data
+
+**Configuration:**
+- Select which model attribute to change
+- Provide new value
+- Value can be static or from DataBus/model
+
+**Example workflow:**
+```
+Trigger: User signs up
+    ↓
+Task: ChangeModel - Set status to "pending"
+    ↓
+Task: SendMail - Send verification email
+    ↓
+Task: SaveModel - Save updated user
+```
+
+#### DomPDF
+
+Generate PDF files from HTML. Integrates with HtmlInput task for dynamic content.
+
+**Use cases:**
+- Generate invoices
+- Create reports
+- Export data as PDF
+
+**Configuration:**
+- HTML content (from HtmlInput or static)
+- Optional: filename, orientation (portrait/landscape)
+- PDF placed on DataBus for next task
+
+**Example workflow:**
+```
+Trigger: Order placed
+    ↓
+Task: HtmlInput - Create invoice HTML with order data
+    ↓
+Task: DomPDF - Generate PDF from HTML
+    ↓
+Task: SendMail - Email invoice PDF to customer
+```
+
+#### Execute
+
+Run shell commands and capture output.
+
+**Use cases:**
+- Run backups
+- Generate files
+- Execute system commands
+- Process data via CLI
+
+**Configuration:**
+- Command to execute (e.g., `ls -la`, `tar czf backup.tar.gz ...`)
+- Output can be placed on DataBus
+
+**⚠️ Security:** Only use with trusted input. Don't execute user-supplied commands.
+
+**Example workflow:**
+```
+Trigger: Schedule (monthly)
+    ↓
+Task: Execute - Run database backup command
+    ↓
+Task: SendSlackMessage - Notify backup complete
+```
+
+#### HtmlInput
+
+Rich text editor that renders Blade templates. Use to create dynamic email content.
+
+**Features:**
+- WYSIWYG editor (Trix)
+- Supports Blade syntax
+- Access model data: `\&#123;\\&#123; $model->name \&#125;\\&#125;`
+- Access DataBus: `\&#123;\\&#123; $databus['variable_name'] \&#125;\\&#125;`
+
+**Use cases:**
+- Create dynamic email body
+- Generate HTML reports
+- Template emails with variables
+
+**Configuration:**
+- Write HTML/Blade in editor
+- Can reference:
+- Model properties: `\&#123;\\&#123; $model->email \&#125;\\&#125;`
+- DataBus values: `\&#123;\\&#123; $databus['key'] \&#125;\\&#125;`
+
+**Example HTML:**
+```html
+<h1>Welcome, \&#123;\\&#123; $model->first_name \&#125;\\&#125;!</h1>
+<p>Thank you for signing up.</p>
+<p>Your account status: \&#123;\\&#123; $databus['status'] \&#125;\\&#125;</p>
+```
+
+#### HttpStatus
+
+Check HTTP status of a URL and get the response code.
+
+**Use cases:**
+- Monitor website uptime
+- Verify links are working
+- Check API endpoints
+
+**Configuration:**
+- URL to check
+- Status code placed on DataBus
+- Can use DataBus values in URL
+
+**Example workflow:**
+```
+Trigger: Schedule (hourly)
+    ↓
+Task: HttpStatus - Check https://example.com
+    ↓
+Task: SendSlackMessage - Alert if status is not 200
+```
+
+#### PregReplace
+
+Find and replace using regular expressions (regex).
+
+**Use cases:**
+- Transform text patterns
+- Clean data
+- Extract/modify strings
+
+**Configuration:**
+- Regex pattern to match
+- Replacement text
+- Source (model property or DataBus)
+- Result placed on DataBus
+
+**Example:**
+```
+Pattern: /phone_(\d+)/
+Replacement: Ext. $1
+Input: "call_phone_5551234"
+Output: "call_Ext. 5551234"
+```
+
+#### LoadModel
+
+Fetch an Eloquent model from database.
+
+**Use cases:**
+- Load related data
+- Get user by ID
+- Retrieve order information
+
+**Configuration:**
+- Model class (e.g., `App\Models\User`)
+- ID to load (static or from DataBus)
+
+**Example workflow:**
+```
+Trigger: Payment received (webhook passes payment_id)
+    ↓
+Task: LoadModel - Load Payment model by ID
+    ↓
+Task: LoadModel - Load related Order model
+    ↓
+Task: SendMail - Send order confirmation
+```
+
+#### SaveFile
+
+Write data to file on disk.
+
+**Use cases:**
+- Create logs
+- Export data
+- Save reports
+- Archive information
+
+**Configuration:**
+- File path (e.g., `logs/workflow_log.txt`)
+- Content to save (static or from DataBus)
+- Storage disk (`local`, `s3`, etc.)
+- Append or overwrite
+
+**Example workflow:**
+```
+Trigger: API request processed
+    ↓
+Task: SaveFile - Log request to "api_requests.log"
+```
+
+#### SaveModel
+
+Save (persist) an Eloquent model to database.
+
+**Use cases:**
+- Save modified model
+- Commit changes after ChangeModel task
+- Record workflow results
+
+**Configuration:**
+- Model to save (usually from workflow context)
+
+**Example workflow:**
+```
+Trigger: User signs up
+    ↓
+Task: ChangeModel - Set verification token
+    ↓
+Task: SendMail - Send verification email
+    ↓
+Task: SaveModel - Save user with token
+```
+
+#### SendMail
+
+Send email with dynamic content and attachments.
+
+**Use cases:**
+- Send notifications
+- Send confirmations
+- Send reports
+- Bulk email campaigns
+
+**Configuration:**
+- Recipient email
+- Subject line
+- Body content (from HtmlInput or static)
+- Attachments (PDF from DomPDF, etc.)
+
+**Example workflow:**
+```
+Trigger: Order placed
+    ↓
+Task: HtmlInput - Create invoice HTML
+    ↓
+Task: DomPDF - Generate invoice PDF
+    ↓
+Task: SendMail - Send invoice to customer
+    (attach: PDF from previous task)
+```
+
+#### SendSlackMessage
+
+Send notifications to Slack channel.
+
+**Uses:**
+- Alert team of important events
+- Post workflow results
+- Send reminders
+- Daily reports
+
+### Setting Up SendSlackMessage
+
+SendSlackMessage requires three setup steps:
+
+**Step 1: Install Laravel Slack Notifications**
+
+Follow [Laravel Slack Documentation](https://laravel.com/docs/notifications#slack-notifications):
+
+```bash
+composer require laravel/slack-notification-channel
+```
+
+**Step 2: Create Slack Webhook**
+
+1. Go to [Slack API](https://api.slack.com/messaging/webhooks)
+2. Create incoming webhook
+3. Select channel to receive messages
+4. Copy webhook URL
+
+**Step 3: Configure Laravel Mail Platform**
+
+Add webhook URL to `.env`:
+
+```env
+WORKFLOW_SLACK_CHANNEL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+```
+
+**Example workflow:**
+
+```
+Trigger: Campaign sent
+    ↓
+Task: SendSlackMessage
+    Message: "Campaign to \&#123;\\&#123;$model->name\&#125;\\&#125; sent successfully"
+```
+
+**Message formatting:**
+
+Use Blade syntax:
+
+```
+New order from \&#123;\\&#123; $model->customer_name \&#125;\\&#125;
+Order ID: \&#123;\\&#123; $model->id \&#125;\\&#125;
+Amount: $\&#123;\\&#123; $model->total \&#125;\\&#125;
+Status: \&#123;\\&#123; $databus['order_status'] \&#125;\\&#125;
+```
+
+---
+
+## DataBus: Passing Data Between Tasks
+
+The DataBus is a communication system that passes information from one task to the next. This keeps tasks independent and reusable.
+
+**How it works:**
+
+```
+Task 1 outputs data → DataBus stores it
+                        ↓
+Task 2 reads from DataBus, does work, outputs data → DataBus stores it
+                        ↓
+Task 3 reads from DataBus, continues
+```
+
+### Data Resources
+
+Use these resource types to access data in your tasks:
+
+#### ValueResource
+
+Simple static values you enter directly.
+
+**Use:**
+```
+Type: "hello world"
+Email: "user@example.com"
+Quantity: "5"
+```
+
+**Example:** Send email to hardcoded address
+
+#### ConfigResource
+
+Access Laravel configuration values.
+
+**Use:**
+```
+app.name           → Your app name from config
+app.url            → Your app URL
+mail.from.address  → Sender email from config
+```
+
+**Example:** Use app name in email greeting
+
+#### ModelResource
+
+Access properties from the model passed to the workflow.
+
+**Use:**
+```
+$model->email      → User's email
+$model->name       → User's name
+$model->created_at → When created
+```
+
+**Example:** Send email to user who triggered workflow
+
+#### DataBusResource
+
+Access data output by previous tasks.
+
+**Use:**
+```
+previous_task_output
+generated_pdf_path
+calculated_total
+transformed_data
+```
+
+**Example:** Use PDF generated by DomPDF task as email attachment
+
+### DataBus Flow Example
+
+```
+Trigger: Order placed (passes Order model)
+    ↓
+Task 1: LoadModel
+    Resource: ModelResource ($model->user_id)
+    Outputs: user object → DataBus['customer']
+    ↓
+Task 2: HtmlInput
+    Resources: DataBusResource ($databus['customer']->name)
+    Outputs: invoice HTML → DataBus['invoice_html']
+    ↓
+Task 3: DomPDF
+    Input: DataBusResource ($databus['invoice_html'])
+    Outputs: PDF path → DataBus['invoice_pdf']
+    ↓
+Task 4: SendMail
+    Recipient: DataBusResource ($databus['customer']->email)
+    Body: DataBusResource ($databus['invoice_html'])
+    Attachment: DataBusResource ($databus['invoice_pdf'])
+    ↓
+Complete
+```
+
+---
+
+## Building Your First Workflow
+
+### Scenario: Welcome Email on New User Signup
+
+**Goal:** When user signs up, send welcome email and notify team
+
+**Steps:**
+
+1. **Create workflow** → Go to `/workflows` → New Workflow
+2. **Add trigger** → Observer Trigger on User model "created" event
+3. **Add task 1** → HtmlInput: Create welcome email
+- Content: "Welcome \&#123;\\&#123;$model->first_name\&#125;\\&#125;!"
+4. **Add task 2** → SendMail
+- To: ModelResource ($model->email)
+- Subject: "Welcome!"
+- Body: From DataBus (task 1 output)
+5. **Add task 3** → SendSlackMessage
+- Message: "New user signed up: \&#123;\\&#123;$model->email\&#125;\\&#125;"
+6. **Save workflow**
+
+**Test:** Create new user in database, workflow executes automatically
+
+### Scenario: Generate and Email Invoice
+
+**Goal:** Generate PDF invoice and email to customer
+
+**Steps:**
+
+1. **Create workflow** → Go to `/workflows` → New Workflow
+2. **Add trigger** → Button Trigger (render in Order details page)
+3. **Add task 1** → HtmlInput: Create invoice HTML
+- Use: ModelResource to access order details
+- Use: Blade to format amounts
+4. **Add task 2** → DomPDF: Generate PDF
+- Input: From task 1
+- Output: PDF path to DataBus
+5. **Add task 3** → SendMail
+- To: ModelResource ($model->customer_email)
+- Attach: DataBusResource (PDF path)
+6. **Save workflow**
+
+**Test:** Click button on order, email sends with PDF
+
+---
+
+## Advanced Workflows
+
+### Conditional Branching
+
+Create workflows with different paths based on conditions:
+
+```
+Trigger: User updated
+    ↓
+Task 1: Check if status changed
+    - If status = "premium": execute Task 2
+    - If status = "suspended": execute Task 3
+    - Otherwise: end workflow
+    ↓
+Task 2: Send upgrade welcome email
+    ↓
+Task 3: Send reactivation email
+```
+
+### Nested Workflows
+
+Trigger other workflows from within a workflow:
+
+```
+Workflow A (Main):
+    Task 1: Process order
+    Task 2: Execute Workflow B (email customer)
+    Task 3: Execute Workflow C (notify warehouse)
+
+Workflow B:
+    Generate invoice
+    Send email
+
+Workflow C:
+    Create shipment label
+    Notify warehouse
+```
+
+### Error Handling
+
+Workflows continue even if individual tasks fail:
+
+```
+Task 1: SendMail (fails - bad email)
+    → Workflow continues
+Task 2: SaveFile (logs error)
+Task 3: SendSlackMessage (alerts admin about error)
+```
+
+---
+
+## Best Practices
+
+### Naming Workflows
+
+Use clear, descriptive names:
+
+✅ Good names:
+- `New User Welcome Email`
+- `Order Confirmation and Invoice`
+- `Daily Report Generation`
+
+❌ Poor names:
+- `workflow1`
+- `test`
+- `misc`
+
+### Task Organization
+
+Keep workflows focused on one purpose:
+
+✅ Good:
+- One workflow = one business process
+- Reuse tasks across workflows
+
+❌ Bad:
+- One huge workflow doing everything
+- Redundant tasks in multiple workflows
+
+### Data Flow
+
+Use DataBus strategically:
+
+✅ Good:
+- Pass data through DataBus between tasks
+- Keep tasks independent
+- Reuse tasks with different data sources
+
+❌ Bad:
+- Hardcode data in tasks
+- Make tasks dependent on each other
+- Duplicate task logic
+
+### Error Handling
+
+Add logging and alerts:
+
+```
+Trigger: Something important
+    ↓
+Task 1: Try main action (may fail)
+    ↓
+Task 2: SaveFile - Log result
+    ↓
+Task 3: SendSlackMessage - Alert team
+```
+
+---
+
+## Troubleshooting
+
+### "Workflow doesn't execute"
+
+**Check:**
+- [ ] Trigger is properly configured
+- [ ] Trigger event actually occurs (check logs)
+- [ ] Tasks have required data
+- [ ] All DataBus references exist
+
+**Debug:**
+- Enable logging in workflow tasks
+- Add SaveFile tasks to log progress
+- Check application logs
+
+### "Task fails silently"
+
+**Check:**
+- [ ] Task configuration is complete
+- [ ] Required fields filled in
+- [ ] DataBus variables exist
+- [ ] Models/files accessible
+
+**Debug:**
+- Add SendSlackMessage after each task
+- Use SaveFile to log intermediate data
+- Check logs for error messages
+
+### "Data not available in DataBus"
+
+**Problem:** Task tries to access DataBus value that doesn't exist
+
+**Causes:**
+- Previous task didn't output to DataBus
+- Wrong variable name
+- Task skipped due to condition
+
+**Fix:**
+- Verify previous task outputs data
+- Check variable names exactly
+- Add conditional logic if task might not run
+
+### "Email not sending"
+
+**Check:**
+- [ ] SendMail task configured
+- [ ] Recipient email is valid
+- [ ] Mail service connected
+- [ ] Subject and body filled in
+
+**Debug:**
+- Test mail service directly
+- Check Laravel logs
+- Verify model has email field
+
+---
+
+## API Reference
+
+### Creating Workflows Programmatically
+
+```php
+use the42coders\Workflows\Models\Workflow;
+
+$workflow = Workflow::create([
+    'name' => 'Welcome Email',
+    'description' => 'Send welcome email to new users',
+]);
+
+// Add trigger
+$workflow->triggers()->create([
+    'type' => 'observer',
+    'model' => 'App\\Models\\User',
+    'event' => 'created',
+]);
+
+// Add tasks
+$workflow->tasks()->create([
+    'name' => 'Send Email',
+    'type' => 'send_mail',
+    'order' => 1,
+    'config' => [
+        'recipient' => 'user@example.com',
+        'subject' => 'Welcome!',
+    ],
+]);
+```
+
+### Executing Workflows
+
+```php
+use the42coders\Workflows\Facades\Workflow;
+
+// Execute workflow by ID
+Workflow::execute(workflow_id, $model);
+
+// Execute by name
+Workflow::executeByName('workflow-name', $model);
+
+// Execute specific tasks
+Workflow::executeTasks($taskIds, $model);
+```
+
+---
+
+## Testing
+
+Run tests:
+
+```bash
+composer test
+```
+
+---
+
+## Related Documentation
+
+- [Tasks](/docs/features/workflows) — Detailed task reference
+- [Triggers](/docs/features/workflows) — Trigger configuration
+- [DataBus](/docs/features/workflows) — Data passing guide
+- [Examples](/docs/features/workflows) — Common workflow patterns
+
+---
+
+## Quick Reference
+
+**Basic Workflow:**
+```
+Trigger (when) → Task 1 → Task 2 → Task 3 → Complete
+                   ↓         ↓        ↓
+                 DataBus passes data between tasks
+```
+
+**Common Tasks:**
+- HtmlInput → Create content
+- DomPDF → Generate PDF
+- SendMail → Send email
+- SendSlackMessage → Notify team
+- SaveFile → Log data
+
+**Data Resources:**
+- ValueResource → Static values
+- ModelResource → Model data (`$model->property`)
+- DataBusResource → Previous task output
+- ConfigResource → Config values
+
+**Access Workflows:**
+- Web interface: `/workflows`
+- API: See API Reference section
+- Triggers: Observer (auto), Button (click)
+
+**Next Steps:**
+- Create first workflow
+- Add multiple tasks
+- Test and refine
+- Share with team

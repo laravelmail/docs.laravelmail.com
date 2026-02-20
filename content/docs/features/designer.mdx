@@ -1,0 +1,72 @@
+---
+title: Visual Designers
+description: Laravel Mail Platform features powerful visual drag-and-drop designers for both email templates and subscription forms. These tools allow you to create professi
+---
+
+# Visual Designers
+
+Laravel Mail Platform features powerful visual drag-and-drop designers for both email templates and subscription forms. These tools allow you to create professional, responsive designs without writing a single line of code.
+
+---
+
+## Email Designer (GrapesJS)
+
+The Email Designer is powered by **GrapesJS**, a best-in-class open-source web builder framework. It allows you to build sophisticated, multi-column email layouts that work across all major email clients.
+
+### Key Features
+- **Drag-and-Drop Blocks**: Pre-defined blocks for text, images, buttons, and layouts.
+- **Style Manager**: Granular control over colors, fonts, margins, and borders.
+- **Device Preview**: Instantly switch between mobile, tablet, and desktop views.
+- **Layers Manager**: Easily navigate complex nested layouts.
+- **Asset Manager**: Upload and manage your brand images and icons.
+
+### Building an Email
+1. Navigate to **Campaigns** or **Templates**.
+2. Create a new entry and look for the **Launch Visual Editor** button.
+3. Drag blocks from the right panel into the canvas.
+4. Click any element on the canvas to edit its properties (Style and Settings).
+5. Use the **Personalization Tags** tool to insert placeholders like `\&#123;\\&#123;first_name\&#125;\\&#125;` or `\&#123;\\&#123;unsubscribe_url\&#125;\\&#125;`.
+6. Click **Save** to exit and persist your design.
+
+### Best Practices for Email Design
+- **Single Column for Mobile**: Stick to a single column layout for maximum compatibility on mobile devices.
+- **Use Web-Safe Fonts**: Stick to Arial, Helvetica, or Georgia to ensure text renders correctly everywhere.
+- **Alt Text for Images**: Always provide descriptive alt text for images in case they are blocked by the recipient's email client.
+
+---
+
+## Form Builder (Formeo)
+
+The Form Builder, powered by **Formeo**, allows you to create custom subscription forms that you can embed on your website or use as standalone landing pages.
+
+### Key Features
+- **Field Types**: Inputs, textareas, checkboxes, radio buttons, selects, and file uploads.
+- **Form Validation**: Set fields as required and define specific validation rules (e.g., email format).
+- **Custom Attributes**: Map form fields directly to your subscriber database columns or tags.
+- **Live Preview**: See exactly how your form will look to potential subscribers.
+
+### Creating a Form
+1. Navigate to **Forms** in the admin sidebar.
+2. Click **New Form**.
+3. Drag fields from the sidebar onto the form canvas.
+4. Configure each field:
+    - **Label**: What the user sees.
+    - **Name**: Should match the subscriber attribute name (e.g., `first_name`, `email`).
+    - **Required**: Toggle whether the field is mandatory.
+5. In the **Settings** tab, configure:
+    - **Subscriber Tags**: Automatically tag any subscriber who joins via this form.
+    - **Redirect URL**: Where to send the user after successful submission.
+6. **Save** the form.
+
+### Embedding Your Form
+Once saved, you have two ways to use your form:
+1. **Public Link**: Share a direct link to the form's landing page (e.g., `https://your-app.com/f/\&#123;uuid\&#125;`).
+2. **Embed Code**: Copy the provided `<script>` or `<iframe>` tag to place the form directly onto your own website.
+
+---
+
+## Tips for High-Converting Forms
+- **Keep it Simple**: Only ask for the information you actually need. Every extra field reduces conversion rate.
+- **Clear Call to Action**: Make your "Subscribe" button stand out with a contrasting color.
+- **Offer an Incentive**: Mention what users get for signing up (e.g., "Get our weekly marketing tips").
+- **Automatic Tagging**: Use the "Auto-Tag" feature to segment subscribers by which form they used (e.g., tagging them as "Blog Subscriber" or "Webinar Lead").

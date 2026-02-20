@@ -1,0 +1,429 @@
+---
+title: Configuration
+description: Laravel Mail Platform stores all configuration in a `.env` file located in your project root. This file contains database connections, encryption keys, queue se
+---
+
+# Configuration
+
+## Overview
+
+Laravel Mail Platform stores all configuration in a `.env` file located in your project root. This file contains database connections, encryption keys, queue settings, and email service credentials.
+
+> **Important:** The `.env` file is sensitive and should never be committed to version control. It contains passwords and API keys. Add it to your `.gitignore` file.
+
+---
+
+## Initial Setup
+
+### Step 1: Create Your `.env` File
+
+By default, Laravel Mail Platform does not include a `.env` file. You'll need to create one:
+
+1. Locate the `.env.example` file in your project root
+2. Make a copy and rename it to `.env`
+3. Update the values as needed for your environment
+
+> **Tip:** Run the included setup command to automate most of this. If you do it manually, follow the steps below.
+
+### Step 2: Generate an Encryption Key
+
+Laravel Mail Platform encrypts sensitive data like user sessions. An encryption key must exist before the application runs.
+
+If you haven't already generated one, run:
+
+```bash
+php artisan key:generate
+```
+
+This creates a unique `APP_KEY` in your `.env` file.
+
+> **Warning:** Regenerating the key will invalidate all active sessions and make any previously encrypted data inaccessible. Only regenerate if absolutely necessary. If you lose your key, you'll need to reset user sessions.
+
+### Step 3: Publish Vendor Files
+
+Publish configuration, views, language files, and assets from the platform:
+
+```bash
+php artisan vendor:publish --provider="Laravel Mail Platform\\Base\\Laravel Mail LaravelMailServiceProvider"
+```
+
+---
+
+## Essential Configuration
+
+### Application URL
+
+Set the base URL where your Laravel Mail Platform installation is hosted. This is used to generate links in emails (unsubscribe links, registration emails, etc.).
+
+```env
+APP_URL=https://campaigns.example.com
+```
+
+Replace `campaigns.example.com` with your actual domain. Include the protocol (`https://` or `http://`).
+
+> **Important:** If this is incorrect, users won't be able to unsubscribe, and email links will break.
+
+---
+
+## Database Connection
+
+Laravel Mail Platform stores all campaigns, subscribers, and analytics in a database. You must configure your database connection before running migrations.
+
+### Step 1: Choose Your Database Type
+
+Set `DB_CONNECTION` to your database provider:
+
+```env
+DB_CONNECTION=mysql    # for MySQL/MariaDB
+DB_CONNECTION=pgsql    # for PostgreSQL
+```
+
+### Step 2: Configure Connection Details
+
+Add your database host, port, name, and credentials:
+
+```env
+DB_HOST=127.0.0.1           # Database server address (127.0.0.1 for local)
+DB_PORT=3306                # Database port (3306 for MySQL, 5432 for PostgreSQL)
+DB_DATABASE=laravel_mail    # Database name
+DB_USERNAME=root            # Database user
+DB_PASSWORD=your_password   # Database password
+```
+
+**Common scenarios:**
+
+- **Local development:** `DB_HOST=127.0.0.1`, `DB_PORT=3306`
+- **Remote server:** `DB_HOST=db.example.com`, use appropriate port
+- **Docker:** `DB_HOST=mysql` (or your service name), port as exposed
+
+### Step 3: Run Database Migrations
+
+Migrations set up the database schema automatically. Run this command once after configuring the connection:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+This creates all necessary tables and seeds initial data.
+
+> **Important:** Do not manually modify the database schema. Any changes Laravel Mail Platform needs should be handled through migrations. Manually altering the database can break the application.
+
+### Enable HTTPS for Octane/Roadrunner (Development)
+OCTANE_HTTPS=true
+
+### Smart Database Refresh (Development)
+
+If you need to refresh your database schema but want to **preserve your existing data**, use the `db:smart-refresh` command:
+
+```bash
+php artisan db:smart-refresh
+```
+
+This command will backup your data to JSON, wipe the database, re-seed it, and then restore your backed-up records.
+
+---
+
+## AI & Intelligence Configuration
+
+Laravel Mail Platform integrates with AI services for content generation and intelligence features.
+
+### Ollama (Local AI)
+If you are running Ollama locally or on a private server:
+
+```env
+OLLAMA_URL=https://ai.your-server.com
+OLLAMA_MODEL=mistral:7b
+OLLAMA_DELAY_SECONDS=180
+```
+
+### Izdrail LLM (Cloud AI)
+For cloud-based AI generation:
+
+```env
+IZDRAIL_BASE_URL=https://llm.izdrail.com
+IZDRAIL_API_KEY=your_api_key
+IZDRAIL_MODEL=gpt-4o
+```
+
+---
+
+## Background Jobs & Queue Processing
+
+Laravel Mail Platform uses a queue system to send emails asynchronously. Without proper queue configuration, campaigns will not send.
+
+### Choose a Queue Driver
+
+Set `QUEUE_CONNECTION` in your `.env` file to one of three options:
+
+```env
+QUEUE_CONNECTION=sync       # Synchronous (simple, not recommended for production)
+QUEUE_CONNECTION=database   # Asynchronous via database (good for small/medium lists)
+QUEUE_CONNECTION=redis      # Asynchronous via Redis (recommended for large lists)
+```
+
+### Queue Option Comparison
+
+| Option | Best For | Setup Complexity | Performance | Notes |
+|--------|----------|------------------|-------------|-------|
+| **Sync** | Development, testing | None | ⭐ | Users wait for each email to send. Not scalable. |
+| **Database** | Small to medium lists | Low | ⭐⭐⭐ | Uses existing database. Can impact DB performance under heavy load. |
+| **Redis** | Medium to large lists | Medium | ⭐⭐⭐⭐⭐ | Fastest option. Requires separate Redis service. |
+
+### Setting Up Sync Queue (Development Only)
+
+Synchronous queues process jobs immediately as they're requested. The user must wait for completion before continuing.
+
+```env
+QUEUE_CONNECTION=sync
+```
+
+No additional setup needed, but only suitable for small test campaigns.
+
+### Setting Up Database Queue
+
+Database queues run asynchronously, allowing users to continue working while emails send in the background.
+
+**Step 1:** Set the driver
+
+```env
+QUEUE_CONNECTION=database
+```
+
+**Step 2:** Create the jobs table
+
+```bash
+php artisan queue:table
+php artisan migrate
+```
+
+**Step 3:** Run a queue worker
+
+In a separate terminal, run:
+
+```bash
+php artisan queue:work --queue=message-dispatch
+php artisan queue:work --queue=webhook-process
+```
+
+Keep these workers running in the background (in production, use a process manager like Supervisor).
+
+### Setting Up Redis Queue
+
+Redis is the recommended solution for production. It's fast, scalable, and can handle very large volumes.
+
+**Requirements:**
+- Redis server installed and running on your infrastructure
+- PHP Redis extension
+
+**Step 1:** Install Redis on your server (example for Ubuntu)
+
+```bash
+sudo apt-get install redis-server
+sudo systemctl start redis-server
+```
+
+**Step 2:** Configure Redis connection
+
+```env
+QUEUE_CONNECTION=redis
+REDIS_HOST=127.0.0.1        # Redis server address
+REDIS_PASSWORD=null         # Leave as null if no password (or set a password)
+REDIS_PORT=6379             # Redis port
+```
+
+**Step 3:** Start processing queues with Laravel Horizon
+
+Laravel Horizon provides an easy way to manage Redis queues with automatic autoscaling.
+
+First, publish Horizon's assets:
+
+```bash
+php artisan horizon:publish
+```
+
+Then start Horizon:
+
+```bash
+php artisan horizon
+```
+
+Keep Horizon running in the background (use Supervisor in production for auto-restart on failure).
+
+#### Horizon Autoscaling
+
+By default, Horizon automatically scales between 2–10 processes for webhooks and 2–20 for message dispatch. To customize these limits, edit `config/horizon.php`:
+
+```php
+'supervisor-2' => [
+    'minProcesses' => 2,
+    'maxProcesses' => 10,
+],
+'supervisor-3' => [
+    'minProcesses' => 2,
+    'maxProcesses' => 20,
+],
+```
+
+---
+
+## Scheduled Tasks (Cron Jobs)
+
+Laravel Mail Platform relies on background tasks that must run every minute. Create a cron job on your server:
+
+```bash
+* * * * * cd /path/to/your/project && php artisan schedule:run >> /dev/null 2>&1
+```
+
+Replace `/path/to/your/project` with your actual project path.
+
+> **Important:** Without this cron job, scheduled campaigns won't send, and background tasks won't run.
+
+**For more details**, see the [Laravel documentation on Task Scheduling](https://laravel.com/docs/scheduling).
+
+---
+
+## Temporal IO (Workflows)
+
+For durable, long-running workflows (like product imports), configure your Temporal address:
+
+```env
+TEMPORAL_ADDRESS=temporal:7233
+```
+
+---
+
+## User Management & Registration
+
+### Enabling User Registration
+
+To allow users to register or invite team members, set:
+
+```env
+LARAVEL_MAIL_REGISTER=true
+```
+
+### Enabling Password Resets
+
+By default, users can reset their passwords. To disable this:
+
+```env
+LARAVEL_MAIL_PASSWORD_RESET=false
+```
+
+### Configure the Email Service
+
+Laravel Mail Platform must be able to send registration, invitation, and password reset emails. This requires a separate email service configuration (different from the email services configured within workspaces).
+
+> **Note:** This is for Laravel Mail Platform's internal emails only—not for campaign emails.
+
+Set `MAIL_MAILER` to your chosen provider and add the required configuration below.
+
+#### SMTP or Sendmail
+
+For standard SMTP providers (Gmail, Office 365, custom servers) or sendmail:
+
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your-app-password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=noreply@example.com
+MAIL_FROM_NAME=Laravel Mail Platform
+```
+
+Common SMTP settings:
+- **Gmail:** `smtp.gmail.com:587` with [app password](https://support.google.com/accounts/answer/185833)
+- **Office 365:** `smtp.office365.com:587` with TLS
+- **Custom server:** Use your server's SMTP credentials
+
+#### Amazon SES
+
+For AWS Simple Email Service:
+
+```env
+MAIL_MAILER=ses
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+AWS_DEFAULT_REGION=us-east-1
+MAIL_FROM_ADDRESS=noreply@example.com
+MAIL_FROM_NAME=Laravel Mail Platform
+```
+
+#### Mailgun
+
+For Mailgun:
+
+```env
+MAIL_MAILER=mailgun
+MAILGUN_DOMAIN=mg.example.com
+MAILGUN_SECRET=your-mailgun-api-key
+MAILGUN_ENDPOINT=api.mailgun.net
+MAIL_FROM_ADDRESS=noreply@example.com
+MAIL_FROM_NAME=Laravel Mail Platform
+```
+
+#### Postmark
+
+For Postmark:
+
+```env
+MAIL_MAILER=postmark
+POSTMARK_TOKEN=your-postmark-token
+MAIL_FROM_ADDRESS=noreply@example.com
+MAIL_FROM_NAME=Laravel Mail Platform
+```
+
+---
+
+## Important Notes About `.env`
+
+### Blank Values
+If you set a configuration key in `.env` but leave it blank, it will be treated as blank (not ignored). If you don't want to configure a key, remove the entire line rather than leaving it empty.
+
+```env
+# Bad: This will be treated as blank
+MAIL_PASSWORD=
+
+# Good: Just remove it
+```
+
+### Environment-Specific Overrides
+For different environments (local, staging, production), create separate `.env` files or use symbolic linking. Never commit `.env` to version control—use `.env.example` as a template instead.
+
+### Deployment Checklist
+
+- [ ] `.env` file created and configured
+- [ ] `APP_KEY` generated (`php artisan key:generate`)
+- [ ] `APP_URL` set to your domain
+- [ ] Database connection configured and tested
+- [ ] Migrations run (`php artisan migrate`)
+- [ ] Queue driver configured (sync for dev, redis for production)
+- [ ] Queue workers running (or Horizon for Redis)
+- [ ] Cron job configured for `schedule:run`
+- [ ] User management email service configured (if needed)
+- [ ] `.env` added to `.gitignore`
+
+---
+
+## Troubleshooting
+
+**Campaigns won't send:**
+- Verify queue workers are running: `php artisan queue:work --queue=message-dispatch`
+- Check that cron job is configured and executing: `* * * * * cd ... && php artisan schedule:run`
+- Confirm `QUEUE_CONNECTION` matches your setup
+
+**Can't register or reset password:**
+- Ensure `LARAVEL_MAIL_REGISTER=true` and `MAIL_MAILER` is configured
+- Test email credentials independently
+- Check Laravel logs in `storage/logs/`
+
+**Database connection errors:**
+- Verify `DB_HOST`, `DB_PORT`, `DB_USERNAME`, and `DB_PASSWORD` are correct
+- Ensure the database user has permission to access the specified database
+- Test connection: `php artisan tinker` then `DB::connection()->getPdo()`
+
+**Permission denied errors:**
+- Verify the web server has write access to `storage/` and `bootstrap/cache/`
+- Run: `chmod -R 775 storage bootstrap/cache`

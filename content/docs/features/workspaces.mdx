@@ -1,0 +1,697 @@
+---
+title: Workspaces
+description: Workspaces let you keep multiple email marketing projects completely separate. Each workspace has its own subscribers, campaigns, templates, and team members. T
+---
+
+# Workspaces
+
+## What Are Workspaces?
+
+Workspaces let you keep multiple email marketing projects completely separate. Each workspace has its own subscribers, campaigns, templates, and team members. Think of them as isolated email marketing environments.
+
+**Use workspaces to organize:**
+- Different client accounts (agency use case)
+- Different business lines (multiple brands)
+- Separate projects (website vs. podcast vs. product)
+- Different teams (marketing vs. support)
+- Environment separation (staging vs. production)
+
+**Key features:**
+- Completely isolated subscriber lists
+- Separate campaign histories
+- Independent team members and permissions
+- Isolated email services configuration
+- Separate templates and tags
+
+---
+
+## Why Use Multiple Workspaces?
+
+### Scenario 1: Agency Account
+
+You manage email for multiple clients. Each client gets their own workspace:
+
+```
+Your Agency Account
+├─ Client A Workspace
+│  ├─ Client A subscribers
+│  ├─ Client A campaigns
+│  └─ Client A team members
+├─ Client B Workspace
+│  ├─ Client B subscribers
+│  ├─ Client B campaigns
+│  └─ Client B team members
+└─ Client C Workspace
+   ├─ Client C subscribers
+   ├─ Client C campaigns
+   └─ Client C team members
+```
+
+**Benefits:**
+- Complete separation of client data
+- Clients can't see each other's campaigns
+- Each client has own team
+- Easy billing/tracking per client
+
+### Scenario 2: Multiple Brands
+
+Your company owns multiple brands. Each brand gets its own workspace:
+
+```
+Your Company
+├─ Brand A (Product Line)
+│  ├─ Brand A mailing list
+│  ├─ Brand A templates
+│  └─ Brand A campaigns
+├─ Brand B (Services)
+│  ├─ Brand B mailing list
+│  ├─ Brand B templates
+│  └─ Brand B campaigns
+└─ Brand C (Events)
+   ├─ Brand C mailing list
+   ├─ Brand C templates
+   └─ Brand C campaigns
+```
+
+**Benefits:**
+- Each brand has distinct branding/templates
+- Separate subscriber management
+- Different team members per brand
+- Independent email service credentials
+
+### Scenario 3: Separate Teams
+
+Different departments manage their own email:
+
+```
+Your Organization
+├─ Marketing Team Workspace
+│  └─ Campaign newsletters, promotions
+├─ Support Team Workspace
+│  └─ Customer notifications, alerts
+└─ Sales Team Workspace
+   └─ Prospect outreach, follow-ups
+```
+
+**Benefits:**
+- Teams manage own subscribers
+- No accidental conflicts
+- Clear separation of responsibilities
+- Independent campaign schedules
+
+---
+
+## Viewing Your Workspaces
+
+### Access Workspace Menu
+
+1. Click your **username** in the top-right corner
+2. Select **Workspaces** from dropdown menu
+3. See list of all your workspaces
+
+### Workspace List Page
+
+You'll see:
+- **All your workspaces** listed
+- Number of subscribers in each
+- Creation date
+- Owner information
+- Member count
+- **Create Workspace** form
+
+### Workspace Information
+
+For each workspace, you can see:
+- **Name** — Workspace identifier
+- **Owner** — Who created/owns it
+- **Members** — How many team members
+- **Subscribers** — Total subscribers count
+- **Created** — When workspace was created
+- **Last Activity** — When last used
+
+---
+
+## Creating a Workspace
+
+### Step-by-Step
+
+1. Go to **Username** → **Workspaces**
+2. Scroll to **Create Workspace** section
+3. Enter **Workspace Name:**
+- Should be descriptive (e.g., "Client: Acme Corp", "Brand: TechPro")
+- Can include client name or project name
+- Keep it clear for team members
+4. Click **Create Workspace**
+
+**What happens:**
+- Workspace is created immediately
+- You're automatically added as **Admin**
+- You're switched to the new workspace
+- Ready to add subscribers, campaigns, etc.
+
+### Naming Best Practices
+
+✅ **Good workspace names:**
+- `Client: Acme Corporation`
+- `Brand: TechPro Services`
+- `Project: Conference 2024`
+- `Team: Marketing - USA`
+- `Product: Mobile App`
+
+❌ **Avoid these:**
+- `workspace1`, `test`, `temp` — Non-descriptive
+- `AAA`, `Zzz` — Hard to scan
+- `For John` — Too personal
+- `IMPORTANT!!!` — Unprofessional
+- `Do not delete` — Indicates disorganization
+
+### Workspace Limits
+
+- **Workspaces per account:** Unlimited
+- **Subscribers per workspace:** No limit
+- **Team members per workspace:** No limit
+- **Storage:** Depends on plan
+
+---
+
+## Switching Between Workspaces
+
+### Quick Switch
+
+If you have multiple workspaces:
+
+1. Look for **Workspace Selector** dropdown in top-right corner (next to username)
+2. Shows your current workspace (default)
+3. Click dropdown to see all your workspaces
+4. Select different workspace
+5. You're switched immediately
+
+**What changes when you switch:**
+- All subscribers switch (see new workspace's list)
+- All campaigns switch (see new workspace's campaigns)
+- Templates switch (see new workspace's templates)
+- Tags switch (see new workspace's tags)
+- Email services switch (see new workspace's services)
+- Team members switch (see new workspace's members)
+
+### Workspace Context
+
+You always know which workspace you're in:
+
+- Current workspace name displayed in header
+- Workspace selector shows selection
+- All data belongs to current workspace
+- Campaigns sent stay in that workspace
+
+### Navigation After Switch
+
+After switching workspaces:
+- You stay on same page (if it exists in new workspace)
+- Dashboard shows new workspace data
+- Campaigns show new workspace campaigns
+- Subscribers show new workspace subscribers
+
+---
+
+## Managing Workspace Members
+
+### Who Can Manage Members?
+
+Only the **workspace owner** can manage team members.
+
+- Workspace creator is owner
+- Owner can invite/remove members
+- Owner controls permissions (future feature)
+- Owner can transfer ownership (if supported)
+
+### View Current Members
+
+To see who's in your workspace:
+
+1. Go to current workspace
+2. Click **Settings** → **Manage Users** (or Users/Members)
+3. See list of all members with roles
+4. Shows pending invitations separately
+
+### Member List Columns
+
+| Column | Meaning |
+|--------|---------|
+| **Name** | Member's name (if provided) |
+| **Email** | Member's email address |
+| **Role** | Member role (Admin, Editor, Viewer) |
+| **Status** | Active or Pending (invitation sent) |
+| **Joined** | When member joined workspace |
+| **Actions** | Manage (remove, edit permissions) |
+
+---
+
+## Inviting Members to Your Workspace
+
+### Send Invitation
+
+Add new team members to workspace:
+
+1. Go to **Settings** → **Manage Users**
+2. Find **Invite User** section
+3. Enter new member's **Email address:**
+- Must be valid email
+- Should be real email they check
+- Can't be already in workspace
+4. Optionally set **Role:**
+- Admin — Full access to manage workspace
+- Editor — Can create/edit campaigns
+- Viewer — Read-only access
+5. Click **Send Invite**
+
+**What happens:**
+- Invitation email sent to that address
+- Member shows in **Pending Invitations** section
+- They can accept invite and join
+- You can retract if needed
+
+### Pending Invitations
+
+Members who haven't accepted yet show separately:
+
+**Pending Invitations Section:**
+- Shows email address invited
+- Shows invitation date
+- Shows expiration date (if applicable)
+- **Retract** button to cancel invite
+
+### Resend Invitation
+
+If member didn't receive invitation:
+
+1. Go to **Manage Users**
+2. Find member in Pending section
+3. Click **Resend** (or similar)
+4. New invitation email sent
+5. They can accept from new email
+
+### Retract Invitation
+
+Cancel an invitation you sent:
+
+1. Go to **Manage Users**
+2. Find member in Pending section
+3. Click **Retract**
+4. Confirm retraction
+5. Invitation is cancelled
+6. Member is removed from pending list
+
+**When to retract:**
+- Sent to wrong email address
+- No longer need this person
+- Misspelled email
+- Person doesn't want access anymore
+
+---
+
+## Removing Members
+
+### Remove Active Member
+
+Remove someone who's already in workspace:
+
+1. Go to **Settings** → **Manage Users**
+2. Find member in **Active Members** section
+3. Click **Remove** button
+4. Confirm when prompted
+5. Member is immediately removed
+
+**What happens:**
+- Member loses all access to workspace
+- Their campaigns/changes remain (not deleted)
+- They can still access other workspaces they're in
+- No notification sent to member
+
+### Cannot Remove Yourself
+
+You cannot remove yourself from a workspace you own.
+
+**If you want to leave:**
+- Transfer ownership to another admin
+- Then you can be removed
+- Or delete the workspace if not needed
+
+### Remove vs. Delete
+
+| Action | Effect |
+|--------|--------|
+| **Remove Member** | Member loses access; data stays |
+| **Delete Workspace** | Entire workspace deleted; all data gone |
+
+---
+
+## Workspace Roles & Permissions
+
+### Available Roles
+
+Different roles have different capabilities:
+
+| Role | Capabilities | Best For |
+|------|--------------|----------|
+| **Admin** | Full access; manage members | Workspace owner, team leads |
+| **Editor** | Create/edit campaigns; manage subscribers | Team members creating campaigns |
+| **Viewer** | Read-only access; view campaigns | Stakeholders, clients (view-only) |
+
+### Permission Details
+
+**Admin permissions:**
+- ✅ Create campaigns
+- ✅ Edit campaigns
+- ✅ Delete campaigns
+- ✅ Manage subscribers
+- ✅ Invite/remove members
+- ✅ Change workspace settings
+- ✅ Configure email services
+- ✅ Create templates
+
+**Editor permissions:**
+- ✅ Create campaigns
+- ✅ Edit campaigns
+- ✅ Delete own campaigns
+- ✅ Manage subscribers
+- ❌ Manage members
+- ❌ Change workspace settings
+- ❌ Configure email services
+
+**Viewer permissions:**
+- ✅ View campaigns
+- ✅ View subscribers
+- ✅ View messages
+- ✅ View analytics
+- ❌ Create/edit campaigns
+- ❌ Change data
+- ❌ Manage members
+
+---
+
+## Workspace Settings
+
+### Access Workspace Settings
+
+1. Go to current workspace
+2. Click **Settings** or **Workspace Settings**
+3. See all workspace configuration
+
+### Available Settings
+
+**Basic Information:**
+- Workspace name (can edit)
+- Workspace description (optional)
+- Owner information
+
+**Team Management:**
+- Manage Users (invite/remove)
+- Change member roles
+- View audit log
+
+**Email Services:**
+- Configure email providers
+- Set default service
+- Manage credentials
+
+**Integrations:**
+- Connected services
+- API keys
+- Webhooks
+
+---
+
+## Transferring Workspace Ownership
+
+### Transfer Ownership to Another Admin
+
+If you want to transfer control:
+
+1. Go to **Settings** → **Manage Users**
+2. Find new owner (must be Admin)
+3. Click **Make Owner** (or similar)
+4. Confirm transfer
+5. You become regular Admin
+6. New person is Owner
+
+**Why transfer ownership:**
+- Leaving the company
+- Different team taking over
+- Organizational change
+- Share responsibility
+
+### Requirements
+
+- New owner must already be in workspace (invite first if needed)
+- New owner must be Admin role
+- Can only transfer to one person at a time
+- Original owner becomes Admin
+
+---
+
+## Workspace Isolation & Security
+
+### Data Isolation
+
+Each workspace is completely isolated:
+
+- Workspace A subscribers never visible in Workspace B
+- Workspace A campaigns invisible in Workspace B
+- Team members see only workspaces they're in
+- Email services configured per workspace
+
+### Security Features
+
+**Workspace boundaries:**
+- ✅ Members can't access other workspaces they're not in
+- ✅ Admins can only manage their own workspace
+- ✅ Audit logs track changes within workspace
+- ✅ API keys scoped to specific workspace
+
+**Role-based access control:**
+- ✅ Admins have full control
+- ✅ Editors can't change settings
+- ✅ Viewers can't modify data
+- ✅ Permissions enforced at all levels
+
+---
+
+## Common Workspace Scenarios
+
+### Scenario 1: Agency Setting Up Client Workspace
+
+1. Create workspace: "Client: Acme Corp"
+2. Invite client's email: `contact@acme.com`
+3. Set role: Editor (so they can't delete workspace)
+4. Add email service: Client's Mailgun account
+5. Import client's subscriber list
+6. Client logs in and creates campaigns
+7. You can monitor/help as needed
+
+### Scenario 2: Transferring Responsibility
+
+1. Have team member as Editor
+2. Want to give them more control
+3. Promote to Admin: Settings → Manage Users → Make Admin
+4. They can now manage other team members
+5. You can transfer ownership if needed
+
+### Scenario 3: Giving Client View-Only Access
+
+1. Create workspace for client
+2. Invite client: `client@example.com`
+3. Set role: Viewer
+4. They can see all campaigns and analytics
+5. Can't accidentally change anything
+6. Good for stakeholders/approval process
+
+---
+
+## Best Practices
+
+### Organizing Workspaces
+
+**For agencies:**
+- One workspace per client
+- Clear naming: "Client: Company Name"
+- Separate team members per client
+- Each client has own email service
+
+**For multi-brand companies:**
+- One workspace per brand
+- Separate teams by brand
+- Brand-specific templates and tags
+- Brand-specific email services
+
+**For internal teams:**
+- One workspace per department
+- Clear naming by team purpose
+- Separate team members per team
+- Team-specific email service accounts
+
+### Workspace Naming
+
+Use consistent naming patterns:
+
+```
+Pattern 1 (Clients):
+- Client: Acme Corp
+- Client: TechVision Inc
+- Client: GlobalTrade Ltd
+
+Pattern 2 (Brands):
+- Brand: ProductA
+- Brand: ProductB
+- Brand: Services
+
+Pattern 3 (Teams):
+- Team: Marketing
+- Team: Support
+- Team: Sales
+
+Pattern 4 (Projects):
+- Project: Conference 2024
+- Project: Holiday Campaign
+- Project: Product Launch
+```
+
+### Team Management
+
+**Best practices:**
+- ✅ Use meaningful email addresses (team emails, not personal)
+- ✅ Set appropriate roles (don't make everyone Admin)
+- ✅ Remove members who leave
+- ✅ Document workspace purpose
+- ✅ Use Viewer role for stakeholders
+
+**Avoid:**
+- ❌ Making everyone Admin
+- ❌ Sharing login credentials
+- ❌ Keeping departed members in workspace
+- ❌ Vague naming that confuses teams
+
+---
+
+## Troubleshooting
+
+### "Can't create workspace"
+
+**Problem:** Create button not working
+
+**Causes:**
+- Workspace limit reached on your plan
+- Permissions issue
+- Name too long or invalid
+
+**Solution:**
+- Check plan limits
+- Verify you're logged in as account owner
+- Try different workspace name
+
+### "Can't see dropdown to switch workspaces"
+
+**Problem:** No workspace selector visible
+
+**Causes:**
+- Only one workspace in account
+- Not logged in properly
+- Browser cache issue
+
+**Solution:**
+- Dropdown only shows if 2+ workspaces
+- Log out and back in
+- Clear browser cache
+
+### "Invitation not received"
+
+**Problem:** Member didn't get invite email
+
+**Causes:**
+- Email went to spam folder
+- Typo in email address
+- Email service issue
+
+**Solution:**
+- Check spam/junk folder
+- Verify email address spelling
+- Resend invitation
+- Contact support if persists
+
+### "Can't invite user - already in workspace"
+
+**Problem:** Trying to invite someone already there
+
+**Cause:** Email is already a member
+
+**Solution:**
+- Check member list
+- If duplicate, remove old account first
+- Use different email if person has multiple accounts
+
+### "Can't manage members - need Admin role"
+
+**Problem:** Don't have permission to manage users
+
+**Cause:** Your role is Editor or Viewer
+
+**Solution:**
+- Ask workspace Admin to promote you
+- Or ask them to manage members for you
+
+### "Accidentally removed a member"
+
+**Problem:** Need to add them back
+
+**Solution:**
+- Send new invitation to their email
+- They accept and rejoin
+- Data they created remains
+
+---
+
+## Workspace Limits
+
+**Default limits:**
+
+| Item | Limit |
+|------|-------|
+| Workspaces per account | Unlimited |
+| Subscribers per workspace | No limit |
+| Team members per workspace | No limit |
+| Active campaigns | No limit |
+| Templates | No limit |
+
+Check your plan for any limitations.
+
+---
+
+## Related Documentation
+
+- [Teams & Permissions](/docs/features/workspaces) — Detailed permission reference
+- [Account Settings](/docs/general/configuration) — User account management
+- [Subscribers](/docs/features/subscribers) — Workspace subscribers
+- [Campaigns](/docs/features/campaigns) — Workspace campaigns
+
+---
+
+## Quick Reference
+
+**Common Actions:**
+- **View workspaces** — Username → Workspaces
+- **Create workspace** — Username → Workspaces → Create Workspace
+- **Switch workspace** — Dropdown in top-right corner
+- **Invite member** — Settings → Manage Users → Enter email → Send Invite
+- **Remove member** — Settings → Manage Users → Remove button
+- **Retract invitation** — Settings → Manage Users (Pending) → Retract
+
+**Workspace Roles:**
+- **Admin** — Full control (can manage members, change settings)
+- **Editor** — Create/edit content (can't manage members or settings)
+- **Viewer** — View-only (can't make any changes)
+
+**Remember:**
+- Each workspace is completely separate
+- Switch easily with dropdown in top-right
+- Only workspace owner can manage members
+- Remove member removes access but keeps their created data
+- Role determines what team members can do

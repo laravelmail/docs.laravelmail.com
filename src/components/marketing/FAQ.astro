@@ -1,0 +1,40 @@
+---
+interface Props {
+    questions: { q: string, a: string }[];
+}
+
+const { questions } = Astro.props;
+---
+
+<section class="py-24 bg-muted/20">
+    <div class="max-w-4xl mx-auto px-6">
+        <div class="text-center mb-16 space-y-4">
+            <h2 class="text-3xl md:text-5xl font-extrabold text-foreground tracking-tight">Frequently Asked Questions</h2>
+            <p class="text-muted-foreground text-lg">Everything you need to know about the Laravel Mail platform, our self-hosted marketing tools, and B2B lead management.</p>
+        </div>
+
+        <div class="space-y-4">
+            {questions.map((item, i) => (
+                <div class="bg-popover border border-border rounded-xl overflow-hidden group">
+                    <button class="w-full text-left p-6 flex items-center justify-between gap-4 font-bold text-foreground hover:bg-muted/50 transition-colors">
+                        <span>{item.q}</span>
+                        <span class="w-6 h-6 border border-border rounded flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all">
+                            <span class="text-lg">↓</span>
+                        </span>
+                    </button>
+                    <!-- Small placeholder answer, normally would be collapsible -->
+                    <div class="px-6 py-0 max-h-0 overflow-hidden group-focus-within:max-h-40 group-focus-within:py-6 transition-all duration-300 border-t border-border/0 group-focus-within:border-border">
+                        <p class="text-muted-foreground leading-relaxed">{item.a}</p>
+                    </div>
+                </div>
+            ))}
+        </div>
+
+        <div class="mt-16 text-center space-y-6">
+            <h3 class="text-2xl font-bold text-foreground">Still have questions? 🚀 We're here to help.</h3>
+            <div class="flex flex-col items-center gap-4">
+                <a href="https://laravelmail.com" class="bg-foreground text-background px-8 py-3 rounded-full font-bold hover:scale-105 transition-transform">Contact Us</a>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,872 @@
+---
+title: Templates
+description: Templates are reusable email designs that let you maintain consistency and save time. Instead of creating a new design for every campaign, build a template once
+---
+
+# Templates
+
+## What Are Templates?
+
+Templates are reusable email designs that let you maintain consistency and save time. Instead of creating a new design for every campaign, build a template once and use it repeatedly.
+
+**Benefits:**
+- **Consistency** — Keep branding and design consistent across all emails
+- **Speed** — Save hours by reusing rather than redesigning
+- **Maintenance** — Update design once; changes apply to all emails using template
+- **Personalization** — Automatically insert subscriber names, emails, and other details
+- **Compliance** — Ensure unsubscribe and web view links always included
+
+**Common uses:**
+- Monthly newsletters
+- Product announcement template
+- Promotional email template
+- Event notification template
+- Transactional email confirmation
+
+---
+
+## Quick Start: Import Built-In Templates
+
+Laravel Mail Platform includes a library of pre-built professional templates. Import them with one command:
+
+```bash
+php artisan app:import-templates
+```
+
+This downloads and imports all available templates to your workspace. You can then:
+- Use templates as-is
+- Customize them for your brand
+- Use as inspiration for custom templates
+
+---
+
+## Accessing Templates
+
+### View All Templates
+
+See all templates in your workspace:
+
+1. Click **Templates** in the sidebar
+2. You'll see a list of all your templates with:
+- Template name
+- Creation date
+- Last modified date
+- Edit/Duplicate/Delete options
+- How many campaigns use this template
+
+### Search Templates
+
+Find templates by name:
+- Type in search box to filter
+- Partial matches work
+- Real-time filtering
+
+---
+
+## Creating Templates
+
+### Manual Creation (From Scratch)
+
+Build a custom template:
+
+1. Go to **Templates**
+2. Click **+ New Template**
+3. Fill in template details:
+- **Name** — Clear, descriptive name (e.g., "Newsletter Template", "Product Launch")
+- **Content** — HTML email design
+4. Include the required `\&#123;\\&#123;content\&#125;\\&#125;` placeholder
+5. Click **Save**
+
+### Template Basics
+
+Every template needs:
+
+**1. Valid HTML Structure**
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Email</title>
+    <style>
+        body \&#123; font-family: Arial, sans-serif; \&#125;
+        .header \&#123; background: #333; color: white; \&#125;
+    </style>
+</head>
+<body>
+    <!-- Template content here -->
+</body>
+</html>
+```
+
+**2. Required `\&#123;\\&#123;content\&#125;\\&#125;` Placeholder**
+This marks where your campaign message will be inserted:
+
+```html
+<div class="content-area">
+    \&#123;\\&#123;content\&#125;\\&#125;
+</div>
+```
+
+When you send a campaign using this template, the campaign's message replaces `\&#123;\\&#123;content\&#125;\\&#125;`.
+
+### Basic Template Example
+
+Here's a complete minimal template:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body \&#123;
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+        \&#125;
+        .container \&#123;
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+        \&#125;
+        .header \&#123;
+            border-bottom: 2px solid #007bff;
+            margin-bottom: 20px;
+        \&#125;
+        .footer \&#123;
+            border-top: 1px solid #ddd;
+            margin-top: 20px;
+            padding-top: 10px;
+            font-size: 12px;
+            color: #666;
+        \&#125;
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>My Newsletter</h1>
+        </div>
+
+        <!-- Campaign content will appear here -->
+        <div class="content">
+            \&#123;\\&#123;content\&#125;\\&#125;
+        </div>
+
+        <div class="footer">
+            <p>Email: \&#123;\\&#123;email\&#125;\\&#125;</p>
+            <p>
+                <a href="\&#123;\\&#123;unsubscribe_url\&#125;\\&#125;">Unsubscribe</a> |
+                <a href="\&#123;\\&#123;webview_url\&#125;\\&#125;">View in Browser</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+```
+
+---
+
+## Personalizing Templates with Tags
+
+### Available Personalization Tags
+
+Use these tags to automatically insert subscriber information:
+
+| Tag | Inserts | Example |
+|-----|---------|---------|
+| `\&#123;\\&#123;content\&#125;\\&#125;` | Campaign message | *(Required in every template)* |
+| `\&#123;\\&#123;email\&#125;\\&#125;` | Subscriber's email | john@example.com |
+| `\&#123;\\&#123;first_name\&#125;\\&#125;` | Subscriber's first name | John |
+| `\&#123;\\&#123;last_name\&#125;\\&#125;` | Subscriber's last name | Smith |
+| `\&#123;\\&#123;unsubscribe_url\&#125;\\&#125;` | Unsubscribe link URL | `https://example.com/unsubscribe/abc123` |
+| `\&#123;\\&#123;webview_url\&#125;\\&#125;` | View in browser URL | `https://example.com/webview/def456` |
+
+### Tag Syntax
+
+Tags use double curly braces: `\&#123;\\&#123; tag_name \&#125;\\&#125;`
+
+Spacing is flexible—these are equivalent:
+```html
+\&#123;\\&#123;email\&#125;\\&#125;
+\&#123;\\&#123; email \&#125;\\&#125;
+\&#123;\\&#123;  email  \&#125;\\&#125;
+```
+
+### Using Personalization Tags
+
+**In your template HTML:**
+
+```html
+<!-- Greeting with subscriber's name -->
+<p>Hello \&#123;\\&#123;first_name\&#125;\\&#125;,</p>
+
+<!-- Contact info -->
+<p>We have your email on file as: \&#123;\\&#123;email\&#125;\\&#125;</p>
+
+<!-- Personalized subject example -->
+<h1>Hi \&#123;\\&#123;first_name\&#125;\\&#125;, here's what's new this month</h1>
+
+<!-- Full name -->
+<p>Dear \&#123;\\&#123;first_name\&#125;\\&#125; \&#123;\\&#123;last_name\&#125;\\&#125;,</p>
+```
+
+### Handling Missing Data
+
+If a subscriber doesn't have a first name, `\&#123;\\&#123;first_name\&#125;\\&#125;` displays empty. Handle this gracefully:
+
+**Option 1: Use fallback text**
+```html
+<p>Hello \&#123;\\&#123;first_name\&#125;\\&#125;,</p>
+<!-- If no first name, shows: "Hello ," -->
+```
+
+**Option 2: Provide default**
+```html
+<p>Hello \&#123;\\&#123;first_name|Valued Subscriber\&#125;\\&#125;,</p>
+<!-- If no first name, shows: "Hello Valued Subscriber," -->
+```
+
+**Option 3: Only use reliable data**
+```html
+<p>Hello \&#123;\\&#123;email\&#125;\\&#125;,</p>
+<!-- Everyone has email, so this always works -->
+```
+
+### Personalization Example Template
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body \&#123; font-family: Arial, sans-serif; \&#125;
+    </style>
+</head>
+<body>
+    <h1>Welcome, \&#123;\\&#123;first_name\&#125;\\&#125;!</h1>
+
+    <p>Hi \&#123;\\&#123;first_name\&#125;\\&#125; \&#123;\\&#123;last_name\&#125;\\&#125;,</p>
+    <p>We're excited to have you on our mailing list.</p>
+
+    \&#123;\\&#123;content\&#125;\\&#125;
+
+    <hr>
+    <p>Questions? Reply to this email.</p>
+    <p><a href="\&#123;\\&#123;unsubscribe_url\&#125;\\&#125;">Unsubscribe from these emails</a></p>
+</body>
+</html>
+```
+
+---
+
+## URL Tags: Creating Links
+
+### `\&#123;\\&#123;unsubscribe_url\&#125;\\&#125;` — Let Subscribers Opt Out
+
+Generates unique unsubscribe URL for each subscriber. **Important:** You must create the HTML link yourself.
+
+**Correct usage (creates clickable link):**
+```html
+<a href="\&#123;\\&#123;unsubscribe_url\&#125;\\&#125;">Unsubscribe from this list</a>
+```
+
+Renders as: [Unsubscribe from this list](link)
+
+**Incorrect usage (just shows URL as text):**
+```html
+\&#123;\\&#123;unsubscribe_url\&#125;\\&#125;
+```
+
+Renders as: `https://example.com/unsubscribe/abc123xyz` ← plain text, not clickable
+
+### `\&#123;\\&#123;webview_url\&#125;\\&#125;` — View in Browser
+
+Generates unique URL to view email in web browser. Useful for subscribers whose email client doesn't render well, or they want to share the email.
+
+**Correct usage:**
+```html
+<p><a href="\&#123;\\&#123;webview_url\&#125;\\&#125;">View this email in your browser</a></p>
+```
+
+Renders as: [View this email in your browser](link)
+
+**Incomplete usage (just URL):**
+```html
+\&#123;\\&#123;webview_url\&#125;\\&#125;
+```
+
+Shows URL as plain text, not clickable.
+
+### Complete Link Footer Example
+
+```html
+<footer style="border-top: 1px solid #ddd; margin-top: 30px; padding-top: 20px;">
+    <p style="font-size: 12px; color: #666;">
+        © 2024 My Company. All rights reserved.
+    </p>
+    <p style="font-size: 12px; color: #666;">
+        <a href="\&#123;\\&#123;webview_url\&#125;\\&#125;">View in Browser</a> |
+        <a href="\&#123;\\&#123;unsubscribe_url\&#125;\\&#125;">Unsubscribe</a> |
+        <a href="https://example.com/privacy">Privacy Policy</a>
+    </p>
+</footer>
+```
+
+---
+
+## Styling Templates with CSS
+
+### CSS in Email Templates
+
+Email clients have limited CSS support compared to web browsers. Laravel Mail Platform handles this by **inlining CSS automatically**.
+
+**What this means:**
+- Write normal CSS in `<style>` tags
+- System converts to inline `style` attributes
+- Ensures compatibility with email clients
+- No need to manually write inline styles
+
+### CSS Strategy
+
+**Use this approach:**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body \&#123;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        \&#125;
+        .container \&#123;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+        \&#125;
+        h1 \&#123;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        \&#125;
+        .button \&#123;
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+        \&#125;
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Newsletter</h1>
+
+        \&#123;\\&#123;content\&#125;\\&#125;
+
+        <p>
+            <a class="button" href="https://example.com">Learn More</a>
+        </p>
+    </div>
+</body>
+</html>
+```
+
+When sent, CSS gets automatically converted to inline styles:
+
+```html
+<!DOCTYPE html>
+<html>
+<body>
+    <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 20px;">
+        <h1 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+            Newsletter
+        </h1>
+
+        [campaign content]
+
+        <p>
+            <a style="display: inline-block; background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;" href="https://example.com">Learn More</a>
+        </p>
+    </div>
+</body>
+</html>
+```
+
+### CSS Best Practices for Email
+
+**✅ Do:**
+- Use inline styles for critical styling
+- Use embedded `<style>` tags for common styles
+- Test in major email clients (Gmail, Outlook, Apple Mail)
+- Keep colors simple and web-safe
+- Use max-width on container for mobile
+
+**❌ Don't:**
+- Use external stylesheets (email clients ignore them)
+- Use complex layouts (email HTML is basic)
+- Use media queries (limited support)
+- Use JavaScript (email clients don't execute it)
+- Use background images in some clients (use color instead)
+
+### CSS to Avoid in Emails
+
+Some CSS doesn't work in email clients:
+
+```html
+<!-- ❌ Don't use: won't work in many email clients -->
+<style>
+    @media (max-width: 600px) \&#123; /* Limited support */ \&#125;
+    @font-face \&#123; /* Font import limited support */ \&#125;
+    .btn::before \&#123; /* Pseudo-elements unreliable */ \&#125;
+</style>
+```
+
+**Workaround:**
+- Use tables for layout (old but reliable)
+- Use simple CSS that works everywhere
+- Test with email client previews
+
+---
+
+## Editing Templates
+
+### Update Template Content
+
+Modify a template:
+
+1. Go to **Templates**
+2. Find your template in the list
+3. Click **Edit**
+4. Make changes to HTML content
+5. Click **Save**
+
+**What happens when you edit:**
+- Template content is updated
+- All future campaigns using this template use updated design
+- Previously sent campaigns are NOT changed
+- Campaigns in draft using this template see changes
+
+### Rename Template
+
+Change template name:
+
+1. Click **Edit** on template
+2. Change the **Name** field
+3. Click **Save**
+4. New name appears everywhere
+
+### Preview Template
+
+See how template looks:
+
+1. Click **Edit** on template
+2. Look for **Preview** button
+3. Shows template with sample data (example names, emails)
+4. Verify layout and styling
+
+---
+
+## Managing Templates
+
+### Duplicate Template
+
+Create a copy to modify:
+
+1. Go to **Templates**
+2. Click **Duplicate** on template you want to copy
+3. New template created with same content
+4. Automatically named: "Original Name (Copy)"
+5. Edit the copy as needed
+
+**Use case:** Start with existing template and create variations for different campaign types
+
+### Delete Template
+
+Remove unused template:
+
+1. Go to **Templates**
+2. Find template to delete
+3. Click **Delete**
+4. Confirm deletion
+
+**Important:**
+- Deleting template does NOT affect sent campaigns
+- Campaigns already using template keep working
+- Delete only safe if template not actively used
+
+### Check Template Usage
+
+Before deleting, see which campaigns use template:
+
+1. Click **Edit** on template
+2. Look for "Used in X campaigns" section
+3. See list of campaigns using this template
+4. Decide if safe to delete
+
+---
+
+## Using Templates in Campaigns
+
+### Select Template When Creating Campaign
+
+1. Go to **Campaigns** → **New Campaign**
+2. Under **Template** section, choose from dropdown
+3. Template's design loads
+4. Fill in:
+- Campaign name
+- Subject line
+- Campaign content (replaces `\&#123;\\&#123;content\&#125;\\&#125;`)
+5. Send campaign
+
+### Without Template
+
+You can also create campaigns without template:
+
+1. Don't select a template
+2. Write campaign HTML directly
+3. Still include personalization tags if desired
+
+### Template vs. Custom Content
+
+| Aspect | Template | Custom |
+|--------|----------|--------|
+| **Design** | Pre-made | Write own HTML |
+| **Consistency** | Guaranteed | Your responsibility |
+| **Speed** | Faster | Slower |
+| **Personalization** | Included | Add manually |
+| **Best for** | Regular campaigns | One-off emails |
+
+---
+
+## Advanced Template Techniques
+
+### Responsive Email Design
+
+Make templates work on all screen sizes:
+
+```html
+<style>
+    .container \&#123;
+        max-width: 600px;
+        width: 100%;
+        margin: 0 auto;
+    \&#125;
+    .column \&#123;
+        display: block;
+        width: 100%;
+    \&#125;
+    @media (min-width: 600px) \&#123;
+        .two-column \&#123;
+            display: table;
+        \&#125;
+        .column \&#123;
+            display: table-cell;
+            width: 50%;
+        \&#125;
+    \&#125;
+</style>
+
+<div class="two-column">
+    <div class="column">Left side content</div>
+    <div class="column">Right side content</div>
+</div>
+```
+
+### Conditionally Show Content
+
+Show different content based on subscriber data:
+
+```html
+<!-- Show specific text if subscriber has first name -->
+<h1>
+    \&#123;\\&#123;#if first_name\&#125;\\&#125;
+    Welcome back, \&#123;\\&#123;first_name\&#125;\\&#125;!
+    \&#123;\\&#123;else\&#125;\\&#125;
+    Welcome to our newsletter!
+    \&#123;\\&#123;/if\&#125;\\&#125;
+</h1>
+```
+
+*(Syntax depends on Laravel Mail Platform version)*
+
+### Brand Color Variables
+
+Use consistent branding:
+
+```html
+<style>
+    .primary-color \&#123; color: #007bff; \&#125;
+    .primary-bg \&#123; background-color: #007bff; \&#125;
+    .button \&#123;
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+    \&#125;
+</style>
+```
+
+Then use throughout template.
+
+---
+
+## Troubleshooting Templates
+
+### "Content tag not found"
+
+**Problem:** Template saved without `\&#123;\\&#123;content\&#125;\\&#125;`
+
+**Error message:** "Template must include \&#123;\\&#123;content\&#125;\\&#125; placeholder"
+
+**Solution:**
+- Add `\&#123;\\&#123;content\&#125;\\&#125;` to your template
+- This marks where campaign message appears
+
+### "CSS not working in email"
+
+**Problem:** Styles look fine in preview but wrong in email client
+
+**Causes:**
+- Email client doesn't support certain CSS
+- External stylesheets were used (they get ignored)
+- Complex selectors not supported
+
+**Solution:**
+- Use simple, inline-compatible CSS
+- Avoid external stylesheets
+- Use tables for complex layouts
+- Test in actual email clients
+
+### "Personalization tags showing as plain text"
+
+**Problem:** `\&#123;\\&#123;email\&#125;\\&#125;` appears in email as literal text instead of subscriber's email
+
+**Causes:**
+- Tags used outside of template
+- Email client doesn't support (unlikely)
+- System didn't process tags
+
+**Solution:**
+- Verify tags are in template (not campaign content)
+- Use exact syntax: `\&#123;\\&#123;tag_name\&#125;\\&#125;`
+- Check spelling of tag name
+
+### "Unsubscribe link not clickable"
+
+**Problem:** Unsubscribe link shows URL as text, not clickable
+
+**Cause:** Forgot to create `<a>` tag around URL
+
+**Wrong:**
+```html
+\&#123;\\&#123;unsubscribe_url\&#125;\\&#125;
+```
+
+**Correct:**
+```html
+<a href="\&#123;\\&#123;unsubscribe_url\&#125;\\&#125;">Unsubscribe</a>
+```
+
+### "Template looks broken in some email clients"
+
+**Problem:** Template renders fine in Gmail but broken in Outlook
+
+**Causes:**
+- CSS incompatibility
+- HTML structure too complex
+- Used unsupported HTML
+
+**Solution:**
+- Test in preview of different clients
+- Simplify layout
+- Use fallback styling
+- Use tables instead of divs for layout
+
+---
+
+## Template Best Practices
+
+### Design Principles
+
+✅ **Do:**
+- Keep width under 600px (best for most clients)
+- Use web-safe fonts (Arial, Helvetica, Georgia, Times)
+- Include clear call-to-action buttons
+- Test in multiple email clients
+- Use responsive design
+- Include alt text for images
+
+❌ **Don't:**
+- Use embedded fonts (not supported)
+- Use JavaScript (email clients don't run it)
+- Use video (not supported)
+- Use forms (not supported)
+- Rely on CSS (use tables as backup)
+- Use background images (unreliable)
+
+### Compliance & Accessibility
+
+- Include clear unsubscribe link
+- Add web view link
+- Use high contrast colors (for readability)
+- Include alt text for images
+- Use semantic HTML (`<h1>`, `<p>`, etc.)
+- Avoid image-only content
+
+### Performance
+
+- Keep HTML under 100KB
+- Compress images
+- Use simple layouts
+- Avoid unnecessary code
+- Test file size before sending
+
+### Naming Templates
+
+Create clear, descriptive names:
+
+✅ Good names:
+- `Newsletter - Monthly`
+- `Product Launch`
+- `Customer Welcome`
+- `Event Announcement`
+
+❌ Poor names:
+- `email1`
+- `template`
+- `test`
+- `something`
+
+---
+
+## Template Examples
+
+### Simple Newsletter
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body \&#123; font-family: Arial; margin: 0; \&#125;
+        .container \&#123; max-width: 600px; margin: 0 auto; padding: 20px; \&#125;
+        .header \&#123; background: #2c3e50; color: white; padding: 20px; text-align: center; \&#125;
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Monthly Newsletter</h1>
+        </div>
+        \&#123;\\&#123;content\&#125;\\&#125;
+    </div>
+</body>
+</html>
+```
+
+### Promotional Email
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body \&#123; font-family: Arial; margin: 0; \&#125;
+        .container \&#123; max-width: 600px; margin: 0 auto; \&#125;
+        .button \&#123;
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            padding: 15px 40px;
+            text-decoration: none;
+            font-weight: bold;
+        \&#125;
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Special Offer, \&#123;\\&#123;first_name\&#125;\\&#125;!</h1>
+        \&#123;\\&#123;content\&#125;\\&#125;
+        <p>
+            <a class="button" href="https://example.com/offer">Claim Your Discount</a>
+        </p>
+    </div>
+</body>
+</html>
+```
+
+### Branded Newsletter with Footer
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body \&#123; font-family: Arial; color: #333; \&#125;
+        .container \&#123; max-width: 600px; margin: 0 auto; \&#125;
+        .header \&#123; background: #007bff; color: white; padding: 20px; \&#125;
+        .footer \&#123; background: #f8f9fa; border-top: 1px solid #ddd; padding: 15px; text-align: center; font-size: 12px; color: #666; \&#125;
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>My Company Newsletter</h1>
+            <p>\&#123;\\&#123;first_name\&#125;\\&#125; \&#123;\\&#123;last_name\&#125;\\&#125;</p>
+        </div>
+        <div style="padding: 20px;">
+            \&#123;\\&#123;content\&#125;\\&#125;
+        </div>
+        <div class="footer">
+            <p><a href="\&#123;\\&#123;webview_url\&#125;\\&#125;">View in Browser</a> | <a href="\&#123;\\&#123;unsubscribe_url\&#125;\\&#125;">Unsubscribe</a></p>
+            <p>© 2024 My Company. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+```
+
+---
+
+## Related Documentation
+
+- [Campaigns](/docs/features/campaigns) — Send campaigns using templates
+- [Subscribers](/docs/features/subscribers) — Personalization data source
+- [Messages](/docs/features/messages) — View sent emails
+- [Personalization Tags](/docs/personalization) — Reference for all available tags
+
+---
+
+## Quick Reference
+
+**Required Elements:**
+- Valid HTML
+- `\&#123;\\&#123;content\&#125;\\&#125;` placeholder
+
+**Personalization Tags:**
+- `\&#123;\\&#123;email\&#125;\\&#125;` — Subscriber email
+- `\&#123;\\&#123;first_name\&#125;\\&#125;` — Subscriber first name
+- `\&#123;\\&#123;last_name\&#125;\\&#125;` — Subscriber last name
+- `\&#123;\\&#123;unsubscribe_url\&#125;\\&#125;` — Unsubscribe link
+- `\&#123;\\&#123;webview_url\&#125;\\&#125;` — View in browser link
+
+**URL Tags (Remember):**
+- Generate URL only (not clickable link)
+- Must wrap in `<a href="">` tag to make clickable
+- Example: `<a href="\&#123;\\&#123;unsubscribe_url\&#125;\\&#125;">Unsubscribe</a>`
+
+**CSS:**
+- Automatically inlined by system
+- Write normal CSS; system converts
+- Inline styles retained
+- Embedded styles added to inline
+
+**Best Practices:**
+- Max width 600px
+- Use web-safe fonts
+- Include unsubscribe link
+- Test in preview
+- Use responsive design
+- Keep under 100KB

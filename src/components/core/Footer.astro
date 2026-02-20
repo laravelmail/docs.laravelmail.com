@@ -1,54 +1,40 @@
 ---
-import { SITE, FOOTER_SOCIAL_LINKS } from "@data/config";
-import { Icon } from "astro-icon/components";
-
-import { Button } from "@/components/ui/button";
-
 interface Props {
     class?: string;
 }
 
 const { class: className = "" } = Astro.props;
-const activeSocials = FOOTER_SOCIAL_LINKS.filter((social) => social.active);
-const authorHref = SITE.authorUrl;
-const showAuthorLine = Boolean(authorHref && SITE.author);
 ---
 
-<footer class={`bg-popover/80 mt-4 ${className}`}>
-    <div
-        class="text-muted-foreground mx-auto flex max-w-7xl flex-col gap-3 px-5 py-6 text-sm sm:flex-row sm:items-center sm:justify-between"
-    >
-        {
-            showAuthorLine && (
-                <p class="text-center leading-relaxed sm:text-left">
-                    Built with <span aria-label="love">♥️</span> by
-                    <a
-                        href={authorHref}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="text-foreground hover:text-primary"
-                    >
-                        {SITE.author}
-                    </a>
-                </p>
-            )
-        }
-
-        <div class="flex justify-center gap-3 sm:justify-end">
-            {
-                activeSocials.map(({ name, href, linkTitle }) => (
-                    <a
-                        href={href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={linkTitle ?? name}
-                    >
-                        <Button variant="ghost" size="icon">
-                            <Icon name={name} class="size-5" />
-                        </Button>
-                    </a>
-                ))
-            }
+<footer class={`border-t border-border mt-12 bg-background ${className}`}>
+    <div class="mx-auto flex max-w-screen-xl flex-col items-center p-4 text-center md:p-8 lg:p-10">
+        <div class="mb-8">
+            <a
+                data-testid="flowbite-footer-brand"
+                href="https://laravelmail.com"
+                class="flex items-center justify-center"
+            >
+                <img
+                    alt="Laravel Mail logo"
+                    src="https://app.laravelmail.com/logo.svg"
+                    class="mr-3 h-8"
+                />
+                <span
+                    data-testid="flowbite-footer-brand-span"
+                    class="text-foreground self-center text-2xl font-semibold whitespace-nowrap"
+                    >Laravel Mail</span
+                >
+            </a>
         </div>
+        <p class="text-muted-foreground mb-6 text-sm sm:mb-0">
+            Part of the <a href="https://laravelcompany.com" class="text-foreground hover:underline"
+                >Laravel Company</a
+            > ecosystem, delivering integrated messaging, e-commerce, and SEO solutions.
+        </p>
+
+        <span class="text-muted-foreground text-sm sm:text-center"
+            >© 2026 <a href="https://laravelcompany.com" class="hover:underline">Laravel Software</a
+            >. All Rights Reserved.</span
+        >
     </div>
 </footer>

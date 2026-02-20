@@ -1,0 +1,32 @@
+---
+title: Instagram Integration
+description: Integrate your Instagram Business accounts to manage posts and view account details directly from Laravel Mail.
+---
+
+# Instagram Integration
+
+Integrate your Instagram Business accounts to manage posts and view account details directly from Laravel Mail.
+
+## Features
+
+-   **Connect Business Accounts**: Connect Instagram Business/Creator accounts via Facebook Login.
+-   **View Accounts**: See connected accounts and their status.
+-   **Account Management**: Disconnect accounts and refresh tokens.
+
+## Connecting an Account
+
+1.  Navigate to **Settings -> Integrations -> Instagram**.
+2.  Click **Connect Account**.
+3.  You will be redirected to Facebook.
+4.  Log in and select the Instagram Business accounts you want to connect.
+5.  Grant the necessary permissions.
+6.  You will be redirected back to the platform.
+
+## API Reference
+
+### Accounts
+
+-   `GET /api/instagram/accounts` - List connected accounts
+-   `POST /api/instagram/accounts/connect` - Initiate OAuth connection
+-   `DELETE /api/instagram/accounts/\&#123;id\&#125;` - Disconnect account
+-   `POST /api/instagram/accounts/\&#123;id\&#125;/refresh-token` - Refresh access token

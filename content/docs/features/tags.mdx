@@ -1,0 +1,674 @@
+---
+title: Tags
+description: Tags (also called segments) are labels that help you organize and group your subscribers. Think of them as flexible categories that let you target specific audi
+---
+
+# Tags
+
+## What Are Tags?
+
+Tags (also called segments) are labels that help you organize and group your subscribers. Think of them as flexible categories that let you target specific audiences with campaigns.
+
+**Use tags to organize by:**
+- **Content preference** — Newsletter subscribers, product announcements, promotions
+- **Engagement level** — Active users, inactive users, high-value customers
+- **Source** — Website signup, event attendee, referral, partner list
+- **Demographics** — Location, company size, industry, customer type
+- **Purchase status** — Trial user, free tier, premium customer, cancelled
+
+**Key differences from segments:**
+- Tags are **optional** — Subscribers can have zero, one, or many tags
+- Tags are **flexible** — Create as many as you need
+- Tags are **reusable** — Apply same tag to multiple subscribers
+- Tags are **workspace-specific** — Each workspace has its own tags
+
+---
+
+## Why Use Tags?
+
+### Targeted Campaigns
+
+Send the right message to the right people:
+
+**Example 1: Newsletter**
+- Create tag: "Newsletter Subscribers"
+- When sending newsletter, target only this tag
+- Ensures non-subscribers don't receive it
+
+**Example 2: Product Launch**
+- Create tag: "Product Announcement Followers"
+- When announcing new product, target this tag
+- Only engaged users receive announcement
+
+**Example 3: Premium Tier**
+- Create tag: "Premium Users"
+- Send exclusive offers only to premium customers
+- Free tier users don't see premium-only content
+
+### Organization
+
+Keep your subscriber list organized and understandable:
+
+**Without tags:** Thousands of subscribers mixed together; hard to understand audience segments
+
+**With tags:**
+- "Active Users" (1,200 subscribers)
+- "Trial Users" (340 subscribers)
+- "Churned Users" (89 subscribers)
+- "Newsletter" (890 subscribers)
+
+### Compliance
+
+Meet legal requirements by respecting preferences:
+
+- **Newsletter opt-in** — Only send to "Newsletter" tag
+- **Product updates** — Only send to "Announcements" tag
+- **Promotional** — Only send to "Promotions" tag
+
+---
+
+## Viewing Your Tags
+
+### Access Tags
+
+View all tags in your workspace:
+
+1. Go to **Subscribers** in sidebar
+2. Click **Tags** button at top of page
+3. See list of all tags with:
+- Tag name
+- Number of subscribers with this tag
+- Created date
+- Last modified date
+- Edit/Delete actions
+
+### Tag List Features
+
+**View subscriber count:**
+- Each tag shows how many subscribers have it assigned
+- Helps identify which segments are largest
+- Useful for campaign planning
+
+**Sort options:**
+- By name (alphabetical)
+- By subscriber count (largest first)
+- By creation date
+
+**Search tags:**
+- Filter tag list by name
+- Useful if you have many tags
+
+---
+
+## Creating Tags
+
+### Via Application Interface
+
+Create new tags through the web interface:
+
+1. Go to **Subscribers** → **Tags**
+2. Click **+ New Tag** button
+3. Enter tag **Name**:
+- Must be unique in workspace
+- Should be descriptive and clear
+- Examples: "Newsletter", "Premium Users", "Product Beta"
+4. Click **Save**
+
+### Tag Naming Best Practices
+
+✅ **Good tag names:**
+- `Newsletter` — Clear what it's for
+- `Premium Tier` — Easy to understand
+- `Active (Last 30 Days)` — Descriptive scope
+- `Event: Tech Conference 2024` — Specific and organized
+- `Referral: Partner XYZ` — Tracks origin
+
+❌ **Avoid these:**
+- `tag1`, `temp`, `misc` — Non-descriptive
+- `Users` — Too vague
+- `important!!!` — Unprofessional
+- `For John's Campaign` — Too specific to one person
+- `HAHAHAHA` — Confusing
+
+### Tag Organization Strategy
+
+**Use consistent naming patterns:**
+
+```
+Content Type: Newsletter
+Content Type: Product Updates
+Content Type: Announcements
+
+Engagement: Active
+Engagement: Inactive
+Engagement: High Value
+
+Customer Type: Trial
+Customer Type: Free Tier
+Customer Type: Premium
+Customer Type: Enterprise
+
+Source: Website
+Source: Event
+Source: Partnership
+Source: Referral
+
+Location: USA
+Location: Europe
+Location: Asia
+Location: Other
+```
+
+This consistency makes tags easy to find and understand.
+
+### Creating Tags via API
+
+Programmatically create tags:
+
+```php
+POST /api/tags
+\&#123;
+  "name": "Newsletter"
+\&#125;
+```
+
+Returns:
+```json
+\&#123;
+  "id": 1,
+  "name": "Newsletter",
+  "workspace_id": 1,
+  "created_at": "2024-01-15T10:30:00Z"
+\&#125;
+```
+
+See [Tags documentation](/docs/features/tags) for full details.
+
+---
+
+## Editing Tags
+
+### Update Tag Name
+
+Change a tag's name:
+
+1. Go to **Subscribers** → **Tags**
+2. Find the tag in the list
+3. Click **Edit** button
+4. Change the tag **Name**:
+- Must remain unique in workspace
+- Can't duplicate existing tag names
+5. Click **Save**
+
+**What happens when you edit a tag:**
+- The tag name changes everywhere it appears
+- All subscribers assigned to this tag see the new name
+- Campaigns targeting this tag still work
+- No subscribers are affected
+
+### Rename Tag Scenarios
+
+**Scenario 1: Typo Fix**
+- Old: "Newsetter" (typo)
+- New: "Newsletter"
+- All subscribers keep the corrected tag
+
+**Scenario 2: Clarity Update**
+- Old: "Active"
+- New: "Active (Last 30 Days)"
+- More descriptive for team members
+
+**Scenario 3: Reorg Consolidation**
+- Old: "Promo Users" and "Promotional"
+- Consolidate to: "Promotions"
+- Decide which tag to rename to, delete the duplicate
+
+### Update via API
+
+Programmatically update a tag:
+
+```php
+PATCH /api/tags/\&#123;id\&#125;
+\&#123;
+  "name": "Newsletter"
+\&#125;
+```
+
+---
+
+## Assigning Tags to Subscribers
+
+Once you create tags, assign them to your subscribers.
+
+### Assign During Subscriber Creation
+
+When manually adding a subscriber:
+
+1. Go to **Subscribers**
+2. Click **+ New Subscriber**
+3. Fill in email and name
+4. In **Tags** section, check boxes for relevant tags
+5. Click **Save**
+
+New subscriber is created with selected tags.
+
+### Assign During Subscriber Edit
+
+Update tags for existing subscriber:
+
+1. Go to **Subscribers**
+2. Click subscriber's email to open profile
+3. Click **Edit**
+4. In **Tags** section:
+- ✓ Check to add tag
+- ☐ Uncheck to remove tag
+5. Click **Save**
+
+Subscriber's tags are updated immediately.
+
+### Assign During CSV Import
+
+Import subscribers with tags in one step:
+
+1. Go to **Subscribers** → **Import**
+2. Prepare your CSV file (email, first_name, last_name)
+3. Select tags from the **Tags** selector before upload
+4. Upload CSV
+5. All imported subscribers get selected tags
+
+**Important:** All subscribers in one import get the same tags. To assign different tags per subscriber, use multiple imports or the API.
+
+### Bulk Assign Tags
+
+Assign same tag to multiple subscribers:
+
+1. Go to **Subscribers**
+2. Select multiple subscribers (checkboxes)
+3. Click **Bulk Actions** → **Assign Tag**
+4. Choose tag to add
+5. Click **Apply**
+
+All selected subscribers now have that tag.
+
+### Assign via API
+
+Programmatically assign tags:
+
+```php
+PATCH /api/subscribers/\&#123;id\&#125;
+\&#123;
+  "tags": [1, 2, 3]  // Tag IDs to assign
+\&#125;
+```
+
+Or create subscriber with tags:
+
+```php
+POST /api/subscribers
+\&#123;
+  "email": "user@example.com",
+  "first_name": "John",
+  "tags": [1, 2]
+\&#125;
+```
+
+---
+
+## Using Tags for Targeted Campaigns
+
+### Campaign Targeting with Tags
+
+Send campaigns to specific tag combinations:
+
+**Step 1: Create campaign**
+- Go to **Campaigns** → **New Campaign**
+- Fill in subject, content, etc.
+
+**Step 2: Choose recipients**
+- Instead of "All Subscribers"
+- Choose "Tagged with:"
+- Select specific tag(s)
+
+**Step 3: Review**
+- See how many subscribers match this tag
+- Verify before sending
+
+**Example targeting scenarios:**
+
+**Send to Newsletter subscribers only:**
+- Target: `Newsletter` tag
+- Result: Only 890 subscribers (those with tag) receive email
+
+**Send to Premium customers with Product Updates enabled:**
+- Target: `Premium Tier` + `Product Updates` tags
+- Result: Only 145 subscribers (have both tags)
+
+**Send to Active users in USA:**
+- Target: `Active (Last 30 Days)` + `Location: USA` tags
+- Result: Only 423 subscribers
+
+### Tag Combinations
+
+Use multiple tags together:
+
+**AND logic (all tags):**
+- "Newsletter" AND "Active"
+- Subscriber must have BOTH tags
+- Narrower targeting, smaller audience
+
+**OR logic (any tag):**
+- "Newsletter" OR "Promotions"
+- Subscriber can have EITHER tag
+- Broader targeting, larger audience
+
+---
+
+## Removing Tags
+
+### Unassign Tag from Subscriber
+
+Remove a tag from specific subscriber:
+
+1. Go to **Subscribers**
+2. Click subscriber's email
+3. Click **Edit**
+4. In **Tags** section, uncheck the tag
+5. Click **Save**
+
+Tag is removed; subscriber no longer belongs to that group.
+
+### Bulk Remove Tags
+
+Remove tag from multiple subscribers:
+
+1. Go to **Subscribers**
+2. Filter by tag: Show only subscribers with specific tag
+3. Select all (or subset) of filtered subscribers
+4. Click **Bulk Actions** → **Remove Tag**
+5. Choose which tag to remove
+6. Click **Apply**
+
+All selected subscribers have that tag removed.
+
+### Remove via API
+
+Programmatically remove tags:
+
+```php
+PATCH /api/subscribers/\&#123;id\&#125;
+\&#123;
+  "tags": [2]  // Only these tags; others are removed
+\&#125;
+```
+
+---
+
+## Deleting Tags
+
+### Important: Deleting Deletes the Tag, Not Subscribers
+
+When you delete a tag:
+- ✅ Tag is removed from workspace
+- ✅ Tag is removed from all subscribers
+- ❌ Subscribers are NOT deleted
+- ❌ Subscribers are NOT unsubscribed
+
+**Use case:** Remove a tag that's no longer needed
+
+### Before You Delete
+
+Ask yourself:
+- Is this tag still in use? (Check subscriber count)
+- Are any active campaigns targeting this tag?
+- Can I merge this tag with another instead?
+- Do I need to keep historical record?
+
+### Delete Tag (Application Interface)
+
+1. Go to **Subscribers** → **Tags**
+2. Find the tag to delete
+3. Click **Delete** button
+4. Confirm deletion when prompted
+5. Tag is immediately removed
+
+**After deletion:**
+- Subscribers who had this tag lose it
+- Campaigns can't target this tag anymore
+- All tag associations are removed
+- Action is permanent (usually not recoverable)
+
+### Delete Tag (API)
+
+Programmatically delete:
+
+```php
+DELETE /api/tags/\&#123;id\&#125;
+```
+
+---
+
+## Managing Multiple Tags
+
+### Tag Consolidation
+
+Over time you might end up with duplicate or similar tags:
+
+**Scenario: "Newsletter" and "Newsletters" both exist**
+
+1. Review which has more subscribers
+2. Keep the one with more (or better name)
+3. Manually reassign subscribers from old tag to new
+4. Delete the old tag
+
+**Avoid duplicates by:**
+- Establishing naming conventions upfront
+- Using consistent capitalization
+- Checking existing tags before creating new ones
+- Regularly auditing tag list
+
+### Deprecating Tags
+
+Phase out old tags gradually:
+
+1. Rename to indicate it's deprecated: "Newsletter (DEPRECATED)"
+2. Move subscribers to new tag
+3. Don't use in new campaigns
+4. Delete after campaign season ends
+
+### Archiving Strategy
+
+Keep tags organized:
+
+```
+Active Tags:
+- Newsletter
+- Product Updates
+- Premium Tier
+
+Seasonal Tags:
+- Q1 Event 2024
+- Holiday Campaign 2023 (retired)
+
+Deprecated:
+- OldTag1 (merge to Newsletter)
+- OldTag2 (no longer used)
+```
+
+---
+
+## Best Practices
+
+### Tag Strategy
+
+**Do:**
+- ✅ Create tags for clear purposes (not "test" or "temp")
+- ✅ Use descriptive, consistent naming
+- ✅ Use hierarchy in names (e.g., "Customer: Premium")
+- ✅ Create tags before importing subscribers
+- ✅ Document what each tag means
+
+**Don't:**
+- ❌ Create too many similar tags
+- ❌ Use vague names like "important" or "group1"
+- ❌ Create tags you won't use for targeting
+- ❌ Overuse tags (keep to <50 per workspace)
+- ❌ Use tags for tracking instead of analytics
+
+### Subscriber Organization
+
+**Minimum tags (basic):**
+- Newsletter
+- Promotions
+- Product Updates
+
+**Recommended tags (medium):**
+- Newsletter
+- Promotions
+- Product Updates
+- Active Users
+- Inactive Users
+- Premium Users
+- Free Users
+
+**Comprehensive tags (advanced):**
+- Content Type (Newsletter, Updates, Promotions, Alerts)
+- Engagement Level (Active, Inactive, At-Risk)
+- Customer Type (Trial, Free, Premium, Enterprise)
+- Source (Website, Event, Partnership, Referral)
+- Geography (USA, Europe, Asia, LATAM, Other)
+
+### Compliance
+
+**Use tags to respect preferences:**
+- Newsletter tag → Only send newsletters to subscribers with tag
+- Promotions tag → Only send promos to opted-in users
+- Product Updates tag → Only send updates to interested users
+
+**Maintain audit trail:**
+- Document when tags were created
+- Track which campaigns used which tags
+- Keep historical record of tag changes
+
+---
+
+## Troubleshooting
+
+### "Tag name already exists"
+
+**Problem:** Can't create tag because name is taken
+
+**Solution:**
+- Check existing tags for similar names
+- Use slightly different name if needed
+- Or repurpose existing tag instead of creating new one
+
+**Example:**
+- Can't use: "Newsletter"
+- Try: "Newsletter - Daily" or "Newsletter - Weekly"
+
+### "Tag won't save"
+
+**Problem:** Create/edit tag but changes don't save
+
+**Check:**
+- [ ] Tag name is not empty
+- [ ] Tag name doesn't have special characters
+- [ ] Tag name doesn't already exist
+- [ ] You have permission to edit tags
+- [ ] No network connection issues
+
+**Try:**
+- Refresh page and try again
+- Clear browser cache
+- Try different browser
+- Check workspace permissions
+
+### "Tag still showing after delete"
+
+**Problem:** Deleted a tag but it still appears
+
+**Likely causes:**
+- Page didn't refresh after deletion
+- Viewing cached version
+- Permission issue (not actually deleted)
+
+**Solution:**
+- Refresh page (F5 or Ctrl+R)
+- Clear browser cache
+- Check if tag actually exists in tag list
+
+### "Campaign showing tag I just deleted"
+
+**Problem:** Campaign targeting shows deleted tag as option
+
+**Why this happens:**
+- Campaign was targeting deleted tag
+- Tag still shows in campaign settings for reference
+- Tag no longer available for new campaigns
+
+**Solution:**
+- Edit campaign to target different tag
+- Save changes
+- Old tag reference disappears
+
+### "Can't assign multiple tags at once"
+
+**Problem:** Tag selector not showing multiple checkboxes
+
+**Solution:**
+- If using bulk import: Select tags before uploading CSV
+- If using manual edit: Check each tag individually
+- If using API: Pass array of tag IDs: `"tags": [1, 2, 3]`
+
+---
+
+## Tag Limits & Performance
+
+**Tag limits:**
+- No hard limit on number of tags
+- Recommend keeping under 50 per workspace
+- More tags = slower filtering in UI
+- Archival/deletion keeps performance good
+
+**Subscriber limits:**
+- No limit on tags per subscriber
+- One subscriber can have many tags
+- More tags = more precise targeting
+- Recommend 0-10 tags per subscriber on average
+
+---
+
+## Related Documentation
+
+- [Subscribers](/docs/features/subscribers) — Manage subscriber lists
+- [Campaigns](/docs/features/campaigns) — Send campaigns to tagged subscribers
+- [Tags](/docs/features/tags) — Organize your audience
+- [API: Tags](/docs/features/tags) — Programmatic tag management
+
+---
+
+## Quick Reference
+
+**Common Actions:**
+- **Create tag** — Subscribers → Tags → New Tag
+- **Edit tag name** — Tags → Edit button
+- **Delete tag** — Tags → Delete button (confirms)
+- **Assign to subscriber** — Open subscriber → Edit → Check tags
+- **Target with campaign** — New Campaign → Choose tag for recipients
+- **Import with tags** — Import → Select tags → Upload CSV
+
+**Tag Organization Pattern:**
+```
+Type: Newsletter, Updates, Promotions, Alerts
+Engagement: Active, Inactive, At-Risk
+Customer: Trial, Free, Premium, Enterprise
+Source: Website, Event, Partner, Referral
+Location: USA, Europe, Asia, Other
+```
+
+**Remember:**
+- Tags are optional (subscribers can have none)
+- One subscriber can have multiple tags
+- Use tags for campaign targeting
+- Deleting tag removes it from subscribers (doesn't delete subscribers)
+- Keep tag names clear and consistent

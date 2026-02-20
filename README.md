@@ -44,7 +44,7 @@ Forget complex Git workflows. Just go to the `content/` folder, drop in a Markdo
 ## 🚀 Quick Start
 
 ```bash
-git clone https://github.com/HYP3R00T/CelestialDocs.git my-docs
+git clone https://github.com/laravelmail/docs.laravelmail.com.git my-docs
 cd my-docs
 pnpm install && pnpm dev
 ```

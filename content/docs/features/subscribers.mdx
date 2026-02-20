@@ -1,0 +1,630 @@
+---
+title: Subscribers
+description: Subscribers are the individuals on your mailing lists—the people who will receive your campaigns. Each subscriber has a unique email address within your workspa
+---
+
+# Subscribers
+
+## What Are Subscribers?
+
+Subscribers are the individuals on your mailing lists—the people who will receive your campaigns. Each subscriber has a unique email address within your workspace, along with optional personal details like name and tags.
+
+Think of subscribers as your audience database:
+- **Email address** — Their unique identifier
+- **Personal info** — First/last name, custom fields
+- **Subscription status** — Subscribed, unsubscribed, or bounced
+- **Segments** — Grouping for targeted campaigns
+
+Every campaign you send is delivered to a subset of your subscribers based on targeting rules and segments you define.
+
+---
+
+## Accessing Your Subscribers
+
+### View All Subscribers
+
+To see your complete subscriber list:
+
+1. Click **Subscribers** in the sidebar
+2. You'll see a paginated table of all subscribers in your workspace
+
+**Each row shows:**
+- Email address (clickable to view details)
+- First name (if available)
+- Last name (if available)
+- Subscription status
+- Segments (if assigned)
+
+---
+
+## Filtering and Searching Subscribers
+
+### Quick Search
+
+Find subscribers using:
+
+**Search by email or name:**
+- Partial matches work (e.g., "john" finds "john@example.com" and "John Smith")
+- Case-insensitive search
+- Real-time results
+
+**Example searches:**
+- `user@example.com` — Exact email
+- `john` — Any subscriber with "john" in email or name
+- `smith` — Last names containing "smith"
+
+### Filter by Subscription Status
+
+Narrow results by status:
+
+| Status | Meaning | Can Send To? |
+|--------|---------|------------|
+| **Subscribed** | Active subscriber | ✅ Yes |
+| **Unsubscribed** | Opted out or manually unsubscribed | ❌ No |
+| **Bounced** | Email provider rejected message | ❌ No |
+| **Pending** | Awaiting confirmation (double opt-in) | ❌ No |
+
+**Common filter scenarios:**
+- Show only **Subscribed** → To see active audience
+- Show only **Unsubscribed** → To review who opted out
+- Show only **Bounced** → To identify bad email addresses
+
+### Combine Filters
+
+Use multiple filters together:
+- Search: "user@gmail.com"
+- Status: "Subscribed"
+- Result: That one subscriber, if they're subscribed
+
+---
+
+## Viewing a Subscriber Profile
+
+Click any subscriber's email address to see their complete profile:
+
+### Subscriber Details Section
+
+**Basic Information:**
+- Email address
+- First name
+- Last name
+- Subscription status
+- Join date
+- Last updated date
+
+**Segment Membership:**
+- All segments this subscriber belongs to
+- Used to organize targeted campaigns
+
+### Messages Section
+
+Complete history of emails sent to this subscriber:
+
+| Info | Meaning |
+|------|---------|
+| **Campaign** | Which campaign this email came from |
+| **Sent Date** | When the message was dispatched |
+| **Status** | Sent, Delivered, Opened, Clicked, Bounced, Failed |
+| **Actions** | View message, resend, or investigate |
+
+**Use this to:**
+- Track engagement with specific subscriber
+- Verify message delivery
+- Troubleshoot email issues
+- See if they opened/clicked campaigns
+
+### Engagement Summary
+
+If tracking is enabled, see:
+- Total emails sent to this subscriber
+- How many they've opened
+- How many links they've clicked
+- Recent activity timeline
+
+---
+
+## Adding Subscribers
+
+### Manual Addition (Single Subscriber)
+
+Add one subscriber at a time through the interface:
+
+1. Go to **Subscribers**
+2. Click **+ New Subscriber**
+3. Fill in the form:
+- **Email** (required) — Must be unique in your workspace
+- **First Name** (optional)
+- **Last Name** (optional)
+- **Subscribe** — Toggle to set subscription status
+- **Segments** (optional) — Choose relevant segments
+4. Click **Save**
+
+**Use this for:**
+- Adding a single person manually
+- Testing before importing bulk lists
+- Adding subscriber as they sign up
+
+### CSV Import (Bulk)
+
+Import hundreds or thousands of subscribers at once:
+
+1. Go to **Subscribers**
+2. Click the **⋯** (menu) button
+3. Click **Import Subscribers**
+4. Prepare your CSV file (see format below)
+5. Click **Browse** and select your file
+6. Optionally assign segments to all imported subscribers
+7. Click **Upload**
+
+#### CSV File Format
+
+Your CSV file must have:
+- **Header row** (first row) with column names
+- **Data rows** (one subscriber per row)
+- **Columns in this exact order:**
+
+| Column | Required? | Notes |
+|--------|-----------|-------|
+| `id` | No | Leave blank for new subscribers; required only when updating existing subscriber's email |
+| `email` | Yes | Must be unique in workspace; if email exists, first/last name will be updated |
+| `first_name` | No | Can be left empty |
+| `last_name` | No | Can be left empty |
+
+**Example CSV:**
+
+```csv
+id,email,first_name,last_name
+,john@example.com,John,Smith
+,sarah@example.com,Sarah,Jones
+42,mary@example.com,Mary,Wilson
+```
+
+**Explanation:**
+- Row 1: Headers (required, exact names and order)
+- Row 2: New subscriber John Smith
+- Row 3: New subscriber Sarah Jones
+- Row 4: Update existing subscriber (ID 42) with new email
+
+#### CSV Upload Steps
+
+1. **Prepare your file:**
+- Use Excel, Google Sheets, or any text editor
+- Save as `.csv` format
+- Include header row with exact column names
+- Verify email addresses are valid
+
+2. **Select file:**
+- Click **Browse** button
+- Choose your prepared CSV file
+
+3. **Assign segments (optional):**
+- If you have segments created, choose which ones apply
+- **Note:** Segments apply to ALL subscribers in the import
+- To assign different segments to different subscribers, do separate imports
+
+4. **Upload:**
+- Click **Upload** button
+- Wait for confirmation
+
+5. **Review results:**
+- Successfully imported: How many subscribers added/updated
+- Errors: Any rows that failed (and why)
+- View import log for details
+
+#### CSV Import Behavior
+
+**Creating new subscribers:**
+- Email doesn't exist → New subscriber created with that email and names
+
+**Updating existing subscribers:**
+- Email already exists → First and last names are updated
+- **To update email address:** Must include `id` field (from export)
+
+**Duplicate prevention:**
+- Emails are unique per workspace
+- Importing same email twice in same file → Uses first occurrence, skips duplicates
+
+**Segment assignment:**
+- All subscribers in one import get same segments
+- To use different segments per subscriber, use API or do multiple imports
+
+#### Common CSV Issues
+
+**"Invalid CSV format"**
+- Header row missing
+- Column names don't match exactly (case-sensitive)
+- Columns in wrong order
+
+**"Duplicate email address"**
+- Two rows have same email in one file
+- Email already exists in workspace
+- Remove duplicates and retry
+
+**"Missing required field"**
+- Email column is empty
+- Check that all data rows have email addresses
+
+### API Import (Programmatic)
+
+For advanced automation, use the API to create and update subscribers:
+
+```php
+POST /api/subscribers
+\&#123;
+  "email": "user@example.com",
+  "first_name": "John",
+  "last_name": "Doe",
+  "subscribed": true,
+  "segments": [1, 2, 3]
+\&#125;
+```
+
+See the [Subscribers API documentation](/docs/features/subscribers) for full details.
+
+---
+
+## Updating Subscribers
+
+### Edit Single Subscriber
+
+To change a subscriber's details:
+
+1. Go to **Subscribers**
+2. Click their email address to open profile
+3. Click **Edit** button
+4. Update any of:
+- First name
+- Last name
+- Subscription status (toggle Subscribe switch)
+- Segments
+5. Click **Save**
+
+**What you can edit:**
+- ✅ Name, segments, status
+- ❌ Email (must delete and re-add to change)
+
+### Bulk Update via CSV
+
+To update multiple subscribers at once:
+
+1. **Export** current subscribers (see Exporting Subscribers below)
+2. Edit the exported file with updates
+3. Make sure `id` column is filled for updates
+4. Upload the modified CSV
+5. Existing emails will be updated; new emails will be created
+
+### Update via API
+
+Programmatically update subscriber information:
+
+```php
+PATCH /api/subscribers/\&#123;id\&#125;
+\&#123;
+  "first_name": "Updated Name"
+\&#125;
+```
+
+---
+
+## Exporting Subscribers
+
+Download your subscriber list for backup, analysis, or migration:
+
+1. Go to **Subscribers**
+2. Click the **⋯** (menu) button
+3. Click **Export Subscribers**
+4. File downloads as CSV
+
+**Exported file contains:**
+- `id` — Subscriber ID (needed for updates via CSV)
+- `email` — Email address
+- `first_name` — First name
+- `last_name` — Last name
+- `subscribed` — Subscription status (true/false)
+- `segments` — Segment IDs assigned
+
+**Uses for export:**
+- **Backup** — Save your list regularly
+- **Migration** — Move to another email platform
+- **Analysis** — Analyze data in Excel or Google Sheets
+- **Re-import** — Update multiple subscribers via CSV
+
+---
+
+## Segments
+
+Segments allow you to organize subscribers into groups for targeted campaigns.
+
+### What Are Segments?
+
+Segments are tags or categories for your subscribers:
+- **Newsletter subscribers** — People who opted into newsletter
+- **Premium users** — Paid customers
+- **Inactive users** — Haven't opened email in 90 days
+- **Geographic regions** — USA, Europe, Asia, etc.
+
+A single subscriber can belong to multiple segments.
+
+### Using Segments
+
+**When creating/editing subscriber:**
+- Check the segments that apply to this subscriber
+- One subscriber can have many segments
+
+**When creating campaign:**
+- Choose which segments to target
+- Only subscribers in selected segments receive campaign
+- Enables precise audience targeting
+
+**Example workflow:**
+1. Create segments: "Newsletter", "Premium", "Trial"
+2. Import subscribers and assign appropriate segments
+3. Send newsletter to "Newsletter" segment only
+4. Send product announcement to "Premium" segment
+
+See the [Tags documentation](/docs/features/tags) for detailed setup.
+
+---
+
+## Subscription Status Management
+
+### Understanding Statuses
+
+**Subscribed**
+- Subscriber is active and able to receive campaigns
+- Default status for newly added subscribers
+- Can manually toggle to Unsubscribed
+
+**Unsubscribed**
+- Subscriber has opted out and will not receive campaigns
+- Set when subscriber clicks unsubscribe link
+- Can be manually changed back to Subscribed if they re-engage
+
+**Bounced**
+- Email provider rejected the message as undeliverable
+- Typically means email address is invalid or no longer exists
+- Should be cleaned up from your list
+
+**Pending**
+- Subscription awaiting confirmation (double opt-in)
+- Subscriber hasn't clicked confirmation link yet
+- Only used if double opt-in is enabled
+
+### Manual Unsubscribing
+
+To manually unsubscribe a subscriber:
+
+1. Go to **Subscribers**
+2. Click the subscriber's email
+3. Click **Edit**
+4. Uncheck the **Subscribed** checkbox
+5. Click **Save**
+
+The subscriber is now unsubscribed and won't receive future campaigns.
+
+---
+
+## Unsubscribe Links
+
+### Automatic Unsubscribe Links
+
+Laravel Mail Platform can automatically inject unsubscribe links into your emails, allowing subscribers to opt out themselves.
+
+### How Unsubscribe Works
+
+**1. Subscriber clicks unsubscribe link**
+- Link included in email footer
+
+**2. Confirmation page loads**
+- Subscriber sees: "Are you sure you want to unsubscribe?"
+- Two options: Confirm or Cancel
+
+**3. If they confirm:**
+- Subscription status changes to "Unsubscribed"
+- They see confirmation message
+- Offered option to resubscribe
+
+**4. If they cancel:**
+- Remain subscribed
+- Redirected to your website
+
+### Setting Up Unsubscribe Links
+
+**In your email template:**
+
+Use the unsubscribe placeholder tag:
+
+```html
+<p>
+  Don't want these emails?
+  <a href="\&#123;unsubscribe_link\&#125;">Unsubscribe here</a>
+</p>
+```
+
+Or use a built-in template variable:
+
+```
+\&#123;\\&#123;unsubscribe_link\&#125;\\&#125;
+```
+
+The system automatically generates a unique unsubscribe link for each recipient.
+
+### Best Practices for Unsubscribe
+
+✅ **Do:**
+- Include unsubscribe link in every email (often required by law)
+- Place in footer where it's easy to find
+- Make the link text clear: "Unsubscribe" or "Manage Preferences"
+- Honor unsubscribe requests immediately
+- Keep a record of unsubscribe requests
+
+❌ **Don't:**
+- Hide the unsubscribe link
+- Make it hard to find
+- Require login to unsubscribe
+- Ignore unsubscribe requests
+- Sell to or contact unsubscribed email addresses
+
+### Compliance
+
+**CAN-SPAM Act (USA):**
+- Requires unsubscribe link in every marketing email
+- Must honor unsubscribe within 10 business days
+- Violators face fines up to $43,280 per email
+
+**GDPR (Europe):**
+- Subscribers must be able to withdraw consent
+- Unsubscribe must be as easy as subscribing
+- Must maintain record of unsubscribe requests
+
+---
+
+## Best Practices
+
+### List Health
+
+**Keep your list clean:**
+- Remove hard bounces (invalid addresses)
+- Remove unsubscribed addresses
+- Monitor bounce rates (should be < 3%)
+- Re-engagement campaigns for inactive subscribers
+
+**Example workflow:**
+1. Monthly: Check bounced messages
+2. Monthly: Send engagement campaign to inactive users (no opens in 90 days)
+3. Quarterly: Export list and validate email addresses
+4. Quarterly: Remove unengaged subscribers
+
+### Segment Strategy
+
+**Organize for success:**
+- Create segments based on source (website, event, partner)
+- Create segments based on engagement (active, inactive, high-value)
+- Create segments based on demographics (location, company size)
+- Create segments based on interests (newsletter, product updates)
+
+**Example segments:**
+```
+Website Subscribers
+├─ Active
+├─ Inactive
+└─ Bounced
+
+Paid Customers
+├─ Premium
+├─ Standard
+└─ Cancelled
+
+Engagement
+├─ Opened Last 30 Days
+├─ Clicked Last 60 Days
+└─ Haven't Engaged
+```
+
+### Data Quality
+
+**When importing:**
+- Validate emails before uploading
+- Remove duplicates
+- Check for typos in names
+- Use consistent formatting
+- Segment during import, not after
+
+**Before campaigns:**
+- Preview with test subscriber
+- Check personalization (names appear correctly)
+- Verify links work
+- Test unsubscribe link
+
+### Privacy & Compliance
+
+- **Collect consent** — Always get permission before adding to list
+- **Double opt-in** — Consider requiring email confirmation
+- **Document sources** — Know where each subscriber came from
+- **Honor preferences** — Respect segment choices and unsubscribe
+- **Data protection** — Use HTTPS for forms, secure exports
+- **Retention policy** — Delete data after reasonable period
+
+---
+
+## Troubleshooting
+
+### "Email already exists"
+
+**Problem:** Can't add subscriber because email already in workspace
+
+**Solutions:**
+- Search for the email to find existing subscriber
+- Edit existing subscriber instead of creating new one
+- If needed to remove, delete existing subscriber first
+
+### "Import failed - invalid CSV"
+
+**Problem:** CSV file rejected with format error
+
+**Check:**
+- [ ] First row is header row with exact column names: `id,email,first_name,last_name`
+- [ ] Column order is correct (id first, then email, then names)
+- [ ] All rows have email address (required field)
+- [ ] No extra blank rows at end of file
+- [ ] File is `.csv` format, not `.xlsx` or other
+
+### "Unsubscribe link not working"
+
+**Problem:** Subscriber clicks unsubscribe but nothing happens
+
+**Troubleshoot:**
+- Check that `\&#123;unsubscribe_link\&#125;` or `\&#123;\\&#123;unsubscribe_link\&#125;\\&#125;` is in template
+- Verify preview shows working link (not broken HTML)
+- Test link before sending campaign
+- Check subscriber email isn't already unsubscribed
+
+### "Subscriber doesn't receive emails"
+
+**Problem:** Subscriber on list but doesn't get campaigns
+
+**Check:**
+- [ ] Subscriber status is "Subscribed" (not unsubscribed)
+- [ ] Email address is correct (no typos)
+- [ ] Subscriber is in targeted segment (if filtering by segment)
+- [ ] Email wasn't bounced previously
+- [ ] Check spam folder (email provider filtering)
+
+---
+
+## Related Documentation
+
+- [Tags](/docs/features/tags) — Organize subscribers into groups
+- [Campaigns](/docs/features/campaigns) — Send campaigns to subscribers
+- [Messages](/docs/features/messages) — View individual emails sent
+- [Templates](/docs/features/template) — Create reusable email designs
+- [API: Subscribers](/docs/features/subscribers) — Programmatic subscriber management
+
+---
+
+## Quick Reference
+
+**Common Actions:**
+- **Add one subscriber** — Subscribers → New Subscriber
+- **Add many subscribers** — Subscribers → Import Subscribers (CSV)
+- **Update subscriber** — Click email → Edit → Save
+- **View history** — Click email → See Messages section
+- **Export list** — Subscribers → Export Subscribers
+- **Unsubscribe someone** — Click email → Edit → Uncheck Subscribed → Save
+
+**Subscriber Statuses:**
+- **Subscribed** — Active; will receive campaigns
+- **Unsubscribed** — Opted out; won't receive campaigns
+- **Bounced** — Invalid address; needs cleanup
+- **Pending** — Awaiting opt-in confirmation
+
+**Segments:**
+- Group subscribers by interests, source, or engagement
+- Use to target campaigns to specific audiences
+- One subscriber can belong to multiple segments
+
+**Unsubscribe:**
+- Add `\&#123;\\&#123;unsubscribe_link\&#125;\\&#125;` to templates
+- Subscriber clicks link to opt out
+- Confirmation required; can resubscribe if desired
+- Required by law (CAN-SPAM, GDPR)

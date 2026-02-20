@@ -1,0 +1,55 @@
+---
+
+---
+
+<div
+    class="sticky top-0 z-50 bg-gradient-to-r from-red-600 to-orange-500 px-4 py-2 text-white shadow-lg"
+>
+    <div
+        class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 text-sm font-medium md:flex-row"
+    >
+        <div class="flex items-center gap-2">
+            <span
+                class="rounded bg-white/20 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase"
+                >Last Chance</span
+            >
+            <span
+                >Beta Pricing Ending Soon • Price increases to £100/installation in exactly: <span
+                    id="countdown"
+                    class="font-mono">2d 8h 7m 16s</span
+                ></span
+            >
+        </div>
+        <a href="#purchase" class="flex items-center gap-1 whitespace-nowrap hover:underline">
+            Secure £10 Price Now <span class="text-lg">→</span>
+        </a>
+    </div>
+</div>
+
+<script>
+    // Simple countdown logic
+    const countdownElement = document.getElementById("countdown");
+    if (countdownElement) {
+        let time = { d: 2, h: 8, m: 7, s: 16 };
+
+        setInterval(() => {
+            time.s--;
+            if (time.s < 0) {
+                time.s = 59;
+                time.m--;
+            }
+            if (time.m < 0) {
+                time.m = 59;
+                time.h--;
+            }
+            if (time.h < 0) {
+                time.h = 23;
+                time.d--;
+            }
+
+            if (time.d >= 0) {
+                countdownElement.textContent = `${time.d}d ${time.h}h ${time.m}m ${time.s}s`;
+            }
+        }, 1000);
+    }
+</script>

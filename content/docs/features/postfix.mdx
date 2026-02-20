@@ -1,0 +1,865 @@
+---
+title: Configuring Postfix for Laravel
+description: Postfix is a powerful, flexible Mail Transfer Agent (MTA) that handles email routing, delivery, and relay on your server. While Laravel abstracts email sending
+---
+
+# Configuring Postfix for Laravel
+
+## Overview
+
+Postfix is a powerful, flexible Mail Transfer Agent (MTA) that handles email routing, delivery, and relay on your server. While Laravel abstracts email sending through its `Mail` facade, the actual delivery depends on an underlying MTA—and Postfix is one of the most reliable choices for Linux production environments.
+
+This guide provides a comprehensive resource for Laravel developers configuring Postfix, from basic setup to advanced features like virtual domains, TLS security, and policy-based filtering.
+
+---
+
+## Why Postfix for Laravel?
+
+Postfix offers several advantages:
+
+**Reliability** — Battle-tested in production for decades; widely deployed across the internet
+
+**Flexibility** — Supports virtual domains, complex routing, relay authentication, and content inspection
+
+**Performance** — Efficient queue management; scales from single-server to high-volume deployments
+
+**Security** — Built-in TLS, SASL authentication, and content filtering; runs with minimal privileges
+
+**Developer-Friendly** — Modular design; can be extended with custom policies and filters
+
+**Laravel Integration** — Works seamlessly with Laravel's mail system via SMTP on localhost
+
+---
+
+## Documentation Structure
+
+This guide is organized into major sections covering different aspects of Postfix configuration. Each section includes concepts, configuration examples, and practical guidance.
+
+| Section | Coverage |
+|---------|----------|
+| [Basic Setup](#basic-setup) | Installation, core parameters, initial configuration |
+| [Security & TLS](#security-and-tls) | Encryption, certificates, authentication |
+| [Virtual Domains](#virtual-domains) | Multi-domain hosting, alias mapping |
+| [SMTP Relay & Access Control](#smtp-relay-and-access-control) | Relay configuration, access policies, rate limiting |
+| [Content Inspection](#content-inspection) | Header/body filtering, anti-spam measures |
+| [Database Lookups](#database-lookups) | MySQL, PostgreSQL, LDAP integration |
+| [Troubleshooting](#troubleshooting) | Debugging, queue management, common issues |
+| [Laravel Integration](#laravel-integration) | Configuration for Laravel Mail system |
+
+---
+
+## Basic Setup
+
+### Installation
+
+**Ubuntu/Debian:**
+```bash
+sudo apt-get update
+sudo apt-get install postfix
+# Choose: Internet Site (for typical mail server)
+sudo systemctl enable postfix
+sudo systemctl start postfix
+```
+
+**CentOS/RHEL:**
+```bash
+sudo yum install postfix
+sudo systemctl enable postfix
+sudo systemctl start postfix
+```
+
+**Verify installation:**
+```bash
+postfix -v
+postconf -n  # Show non-default settings
+```
+
+### Core Configuration Parameters
+
+Edit `/etc/postfix/main.cf` to configure basic settings:
+
+```postfix
+# Hostname and domain
+myhostname = mail.example.com
+mydomain = example.com
+myorigin = $mydomain
+
+# What domains to accept mail for
+mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
+
+# Where to relay mail for external domains
+relayhost =  # Leave empty for direct delivery
+
+# Network interfaces to listen on
+inet_interfaces = 127.0.0.1, [::1]  # Localhost only for app server
+# OR for mail server role:
+inet_interfaces = all
+
+# Queue directory
+queue_directory = /var/spool/postfix
+
+# Trusted users (web server included)
+trusted_users = www-data mail root
+
+# Basic logging
+maillog_file = /var/log/postfix.log
+```
+
+After modifying configuration:
+```bash
+sudo postfix reload
+sudo postfix check  # Verify syntax
+```
+
+---
+
+## Security and TLS
+
+### Transport Layer Security (TLS)
+
+TLS encrypts SMTP connections, preventing eavesdropping on email transmission. Configure Postfix for both incoming (server) and outgoing (client) TLS.
+
+#### Generate Self-Signed Certificate (Test/Development)
+
+```bash
+# Create private key
+sudo openssl genrsa -out /etc/postfix/postfix.key 2048
+
+# Create certificate
+sudo openssl req -new -x509 -days 365 -key /etc/postfix/postfix.key \
+  -out /etc/postfix/postfix.crt
+
+# Set permissions
+sudo chmod 600 /etc/postfix/postfix.key
+sudo chown postfix:postfix /etc/postfix/postfix.key /etc/postfix/postfix.crt
+```
+
+#### Use Let's Encrypt Certificate (Production)
+
+```bash
+# Install Certbot
+sudo apt-get install certbot
+
+# Get certificate for your domain
+sudo certbot certonly --standalone -d mail.example.com
+
+# Postfix runs as 'postfix' user, needs to read certs
+sudo setfacl -m u:postfix:rx /etc/letsencrypt/live
+sudo setfacl -m u:postfix:rx /etc/letsencrypt/archive
+```
+
+#### Configure Postfix for TLS
+
+Add to `/etc/postfix/main.cf`:
+
+```postfix
+# Server-side TLS (incoming connections)
+smtpd_tls_cert_file = /etc/letsencrypt/live/mail.example.com/fullchain.pem
+smtpd_tls_key_file = /etc/letsencrypt/live/mail.example.com/privkey.pem
+smtpd_tls_security_level = may
+smtpd_tls_received_header = yes
+smtpd_tls_loglevel = 1
+
+# Client-side TLS (outgoing connections)
+smtp_tls_security_level = may
+smtp_tls_loglevel = 1
+
+# Forward secrecy (strong ciphers)
+tls_preempt_cipherlist = yes
+smtpd_tls_ciphers = high
+smtp_tls_ciphers = high
+
+# Session caching
+smtpd_tls_session_cache_database = btree:/var/spool/postfix/smtpd_scache
+smtp_tls_session_cache_database = btree:/var/spool/postfix/smtp_scache
+```
+
+### SASL Authentication
+
+SASL enables authenticated SMTP relay, allowing remote users to send through your server.
+
+**Install Cyrus SASL:**
+```bash
+sudo apt-get install libsasl2-2 libsasl2-modules-sql
+```
+
+**Configure SASL in `/etc/postfix/main.cf`:**
+
+```postfix
+# Enable SASL authentication
+smtpd_sasl_auth_enable = yes
+smtpd_sasl_type = cyrus
+smtpd_sasl_path = smtpd
+smtpd_sasl_local_domain = $myhostname
+smtpd_sasl_security_options = noanonymous
+smtpd_sasl_tls_security_options = $smtpd_sasl_security_options
+```
+
+**Create `/etc/postfix/sasl/smtpd.conf`:**
+
+```
+pwcheck_method: auxprop
+auxprop_plugin: sql
+sql_engine: mysql
+sql_hostnames: localhost
+sql_database: postfix
+sql_user: postfix_user
+sql_passwd: postfix_password
+sql_select: SELECT password FROM users WHERE username = '%u@%r'
+```
+
+---
+
+## Virtual Domains
+
+### Virtual Domain Hosting
+
+Host multiple internet domains on a single Postfix server. Virtual domains can use local files or database lookups.
+
+#### Virtual Alias Maps (Forwarding)
+
+Forward mail from virtual domains to local users:
+
+**`/etc/postfix/main.cf`:**
+```postfix
+virtual_alias_domains = example.com, example.net
+virtual_alias_maps = hash:/etc/postfix/virtual
+```
+
+**`/etc/postfix/virtual`:**
+```
+support@example.com     local-user@example.com
+info@example.net        another-user@example.com
+@example.com            catch-all@example.com
+```
+
+**Build the database:**
+```bash
+sudo postmap /etc/postfix/virtual
+sudo postfix reload
+```
+
+#### Virtual Mailbox Maps (Non-Unix Accounts)
+
+Deliver mail to non-system users in a virtual mailbox directory:
+
+**`/etc/postfix/main.cf`:**
+```postfix
+virtual_mailbox_domains = example.com, example.net
+virtual_mailbox_maps = hash:/etc/postfix/virtual_mailboxes
+virtual_mailbox_base = /var/mail/vhosts
+virtual_uid_maps = static:5000
+virtual_gid_maps = static:5000
+virtual_transport = virtual
+```
+
+**`/etc/postfix/virtual_mailboxes`:**
+```
+user@example.com        example.com/user/
+admin@example.net       example.net/admin/
+```
+
+**Create directory structure:**
+```bash
+sudo mkdir -p /var/mail/vhosts/example.com /var/mail/vhosts/example.net
+sudo chown -R 5000:5000 /var/mail/vhosts
+sudo chmod 750 /var/mail/vhosts
+```
+
+---
+
+## SMTP Relay and Access Control
+
+### Relay Configuration
+
+Control which mail Postfix accepts and relays. This prevents open relay abuse (sending spam through your server).
+
+#### Restrict Relay to Local Networks
+
+**`/etc/postfix/main.cf`:**
+```postfix
+# Trust these networks for relay
+mynetworks = 127.0.0.0/8, [::1]/128, 192.168.1.0/24
+
+# Set relay restrictions
+smtpd_relay_restrictions =
+    permit_mynetworks,
+    permit_sasl_authenticated,
+    defer_unauth_destination
+```
+
+#### Restrict by Access Lists
+
+**`/etc/postfix/main.cf`:**
+```postfix
+smtpd_client_restrictions =
+    permit_mynetworks,
+    check_client_access hash:/etc/postfix/client_access,
+    reject_unknown_client_hostname
+
+smtpd_helo_restrictions =
+    permit_mynetworks,
+    reject_invalid_helo_hostname,
+    reject_non_fqdn_helo_hostname
+
+smtpd_sender_restrictions =
+    permit_mynetworks,
+    permit_sasl_authenticated,
+    reject_non_fqdn_sender,
+    reject_unknown_sender_domain
+```
+
+**`/etc/postfix/client_access`:**
+```
+# Allow these IPs
+192.168.1.100       OK
+10.0.0.0/24         OK
+
+# Deny these IPs
+203.0.113.0/24      REJECT
+
+# Throttle specific client
+203.0.113.5         DEFER_IF_PERMIT Service temporarily unavailable
+```
+
+**Build database:**
+```bash
+sudo postmap /etc/postfix/client_access
+sudo postfix reload
+```
+
+### Rate Limiting
+
+Prevent abuse by limiting sender rates:
+
+**`/etc/postfix/main.cf`:**
+```postfix
+# Connection rate limits
+smtpd_client_connection_rate_limit = 10
+smtpd_client_recipient_rate_limit = 100
+
+# Message rate limits
+default_process_limit = 100
+smtp_connect_timeout = 15s
+```
+
+---
+
+## Content Inspection
+
+### Header and Body Checks
+
+Filter emails based on content patterns using regular expressions.
+
+#### Block Emails Containing Bad Words
+
+**`/etc/postfix/main.cf`:**
+```postfix
+header_checks = regexp:/etc/postfix/header_checks
+body_checks = regexp:/etc/postfix/body_checks
+```
+
+**`/etc/postfix/body_checks`:**
+```
+# Block messages with "badword"
+/badword/i          REJECT Message contains prohibited content
+
+# Block common phishing attempts
+/click.*here.*now/i  REJECT Potential phishing content
+
+# Block certain file types
+/\.exe\s*$/i         REJECT Executable files not allowed
+```
+
+**`/etc/postfix/header_checks`:**
+```
+# Reject messages without proper From header
+/^From:\s*$/        REJECT Missing From header
+
+# Block spoofed domains
+/^From:.*@example.net/     REJECT From domain mismatch
+```
+
+**Build database:**
+```bash
+sudo postmap regexp:/etc/postfix/body_checks
+sudo postfix reload
+```
+
+### Milter Integration (Advanced Filtering)
+
+Integrate with SpamAssassin or other milters for advanced content filtering.
+
+**`/etc/postfix/main.cf`:**
+```postfix
+smtpd_milters = inet:localhost:8891
+non_smtpd_milters = $smtpd_milters
+milter_default_action = accept  # Don't reject if milter fails
+```
+
+---
+
+## Database Lookups
+
+### MySQL Lookup Tables
+
+Store virtual aliases and other mappings in MySQL for easier management.
+
+**Build Postfix with MySQL support:**
+```bash
+% make tidy
+% make makefiles CCARGS="-DHAS_MYSQL" AUXLIBS="-lmysqlclient"
+% make
+% make install
+```
+
+**Create database:**
+```sql
+CREATE DATABASE postfix;
+CREATE TABLE virtual_aliases (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    virtual_email VARCHAR(255) NOT NULL,
+    real_email VARCHAR(255) NOT NULL,
+    UNIQUE (virtual_email)
+);
+
+INSERT INTO virtual_aliases (virtual_email, real_email) VALUES
+    ('user@example.com', 'local@example.com'),
+    ('admin@example.net', 'admin@example.com');
+```
+
+**Configure Postfix lookup:**
+**`/etc/postfix/mysql_virtual_alias_maps.cf`:**
+```
+hosts = 127.0.0.1
+user = postfix_user
+password = postfix_password
+dbname = postfix
+query = SELECT real_email FROM virtual_aliases WHERE virtual_email = '%s'
+```
+
+**`/etc/postfix/main.cf`:**
+```postfix
+virtual_alias_domains = mysql:/etc/postfix/mysql_virtual_alias_maps.cf
+virtual_alias_maps = mysql:/etc/postfix/mysql_virtual_alias_maps.cf
+```
+
+### PostgreSQL Lookup Tables
+
+Similar to MySQL but using PostgreSQL:
+
+**Build with PostgreSQL:**
+```bash
+% make tidy
+% make makefiles CCARGS="-DHAS_PGSQL" AUXLIBS="-lpq"
+% make
+% make install
+```
+
+**Database configuration similar to MySQL but with postgresql-specific connection strings.**
+
+### LDAP Lookups
+
+Query LDAP directory for user information:
+
+**Build with LDAP support:**
+```bash
+% make tidy
+% make makefiles CCARGS="-DHAS_LDAP" AUXLIBS="-lldap -llber"
+% make
+% make install
+```
+
+---
+
+## Advanced Routing
+
+### Address Rewriting
+
+Transform email addresses using pattern matching. Useful for normalizing addresses or rewriting to different domains.
+
+**`/etc/postfix/main.cf`:**
+```postfix
+smtp_generic_maps = hash:/etc/postfix/generic
+```
+
+**`/etc/postfix/generic`:**
+```
+user@olddomain.com          user@newdomain.com
+@localdomain.local          @domain.example.com
+(.*)@internal.example.com   $1@external.example.com
+```
+
+**Build and reload:**
+```bash
+sudo postmap /etc/postfix/generic
+sudo postfix reload
+```
+
+### Custom Routing (transport_maps)
+
+Route certain domains through specific mail servers or gateways:
+
+**`/etc/postfix/main.cf`:**
+```postfix
+transport_maps = hash:/etc/postfix/transport
+```
+
+**`/etc/postfix/transport`:**
+```
+# Route to local mailbox
+example.com         local:
+.example.com        local:
+
+# Route through relay server
+partner.com         smtp:[relay.partner.com]:25
+
+# Use different SMTP port
+secure.example.com  smtps:[mail.secure.example.com]:465
+```
+
+**Build database:**
+```bash
+sudo postmap /etc/postfix/transport
+sudo postfix reload
+```
+
+---
+
+## Monitoring and Debugging
+
+### Queue Management
+
+Check and manage the mail queue:
+
+```bash
+# List all queued messages
+mailq
+# OR
+postqueue -p
+
+# Delete a specific message (by ID)
+postsuper -d MESSAGE_ID
+
+# Delete all messages
+postsuper -d ALL
+
+# Hold/release messages
+postsuper -h MESSAGE_ID      # Hold
+postsuper -r MESSAGE_ID      # Release
+
+# Force delivery retry
+postfix flush
+```
+
+### Testing Address Routing
+
+Verify how Postfix will route an address:
+
+```bash
+postmap -q user@example.com /etc/postfix/virtual
+# Output: forwarded address
+
+# Test with a map type
+postmap -q @example.com hash:/etc/postfix/virtual
+```
+
+### Log Analysis
+
+Monitor Postfix logs for issues:
+
+```bash
+# View recent activity
+tail -f /var/log/mail.log
+
+# Search for specific patterns
+grep "from=<user@example.com>" /var/log/mail.log
+
+# Count messages by status
+grep "status=" /var/log/mail.log | grep -o "status=[^ ]*" | sort | uniq -c
+
+# Find rejected messages
+grep "reject" /var/log/mail.log
+
+# Monitor specific queue ID
+grep QUEUE_ID /var/log/mail.log
+```
+
+### Enable Debug Logging
+
+For troubleshooting, enable verbose logging:
+
+**`/etc/postfix/main.cf`:**
+```postfix
+debug_peer_list = example.com
+debug_peer_level = 3
+```
+
+Then monitor with:
+```bash
+tail -f /var/log/mail.log
+```
+
+---
+
+## Laravel Integration
+
+### Configure Laravel for Local Postfix
+
+Laravel's Mail system can use Postfix running on localhost:
+
+**.env file:**
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=127.0.0.1
+MAIL_PORT=25
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS="noreply@example.com"
+MAIL_FROM_NAME="Your Application"
+```
+
+**config/mail.php:**
+```php
+'smtp' => [
+    'transport' => 'smtp',
+    'host' => env('MAIL_HOST', 'localhost'),
+    'port' => env('MAIL_PORT', 25),
+    'encryption' => env('MAIL_ENCRYPTION'),
+    'username' => env('MAIL_USERNAME'),
+    'password' => env('MAIL_PASSWORD'),
+],
+```
+
+### Allow Web Server to Send Mail
+
+Ensure the web server user (www-data) can submit mail to Postfix:
+
+**`/etc/postfix/main.cf`:**
+```postfix
+# Allow www-data to send mail
+trusted_users = www-data
+
+# Accept from localhost
+mynetworks = 127.0.0.0/8
+```
+
+### Send Test Email from Laravel
+
+```php
+Mail::raw('Test message', function($message) \&#123;
+    $message->to('test@example.com')
+            ->subject('Test from Laravel');
+\&#125;);
+```
+
+Check queue:
+```bash
+mailq
+```
+
+---
+
+## Security Best Practices
+
+### Run Postfix with Minimal Privileges
+
+Postfix runs as unprivileged `postfix` user by default. Verify:
+
+```bash
+ps aux | grep postfix
+# Should show: postfix user, not root
+```
+
+### Secure Configuration Files
+
+Protect sensitive configuration:
+
+```bash
+sudo chmod 600 /etc/postfix/main.cf
+sudo chmod 600 /etc/postfix/mysql_virtual_alias_maps.cf
+sudo chown root:root /etc/postfix/main.cf
+```
+
+### Enable SPF, DKIM, DMARC
+
+Prevent email spoofing with DNS records:
+
+**SPF Record (in DNS):**
+```
+v=spf1 mx -all
+```
+
+**DKIM (Generate Keys):**
+```bash
+openssl genrsa -out dkim_private.key 2048
+openssl rsa -in dkim_private.key -pubout -out dkim_public.key
+
+# Add public key to DNS and configure in Postfix
+```
+
+**DMARC Record (in DNS):**
+```
+v=DMARC1; p=quarantine; rua=mailto:admin@example.com
+```
+
+### Implement Postscreen
+
+Use Postfix's built-in spam filter:
+
+**`/etc/postfix/main.cf`:**
+```postfix
+postscreen_enable = yes
+postscreen_denylist_action = enforce
+postscreen_greylist_action = enforce
+```
+
+---
+
+## Troubleshooting
+
+### "Connection refused on port 25"
+
+Postfix isn't running or listening on localhost:
+
+```bash
+sudo systemctl status postfix
+sudo systemctl start postfix
+netstat -tulnp | grep postfix
+```
+
+### "Relay access denied"
+
+Sender not authorized to relay through server:
+
+```bash
+# Check mynetworks
+postconf mynetworks
+
+# Check SASL auth
+postconf -A
+```
+
+### "Undeliverable mail" or High Bounce Rate
+
+**Check bounce logs:**
+```bash
+grep "bounce" /var/log/mail.log
+
+# Investigate specific address
+postmap -q user@domain.com hash:/etc/postfix/virtual
+```
+
+### "TLS errors" or Certificate Issues
+
+```bash
+# Verify certificate
+openssl x509 -in /etc/postfix/postfix.crt -noout -dates
+
+# Check TLS logs
+grep tls /var/log/mail.log
+
+# Test TLS connection
+openssl s_client -connect localhost:25 -starttls smtp
+```
+
+### Performance Issues or Queue Buildup
+
+```bash
+# Check queue size
+mailq | wc -l
+
+# Check for stuck messages
+mailq | grep "^[A-F0-9]"
+
+# Monitor active connections
+postqueue -p | grep "active"
+
+# Increase worker processes (in main.cf)
+default_process_limit = 100
+```
+
+---
+
+## Postfix Parameters Reference
+
+| Parameter | Purpose |
+|-----------|---------|
+| `myhostname` | Server hostname |
+| `mydomain` | Local domain name |
+| `mydestination` | Domains to accept mail for |
+| `relayhost` | External relay server (if any) |
+| `inet_interfaces` | Network interfaces to listen on |
+| `mynetworks` | Trusted networks for relay |
+| `smtpd_tls_cert_file` | TLS certificate path |
+| `smtpd_tls_key_file` | TLS private key path |
+| `virtual_alias_maps` | Virtual alias database |
+| `virtual_mailbox_maps` | Virtual mailbox database |
+
+---
+
+## Common Commands
+
+```bash
+# Reload configuration
+sudo postfix reload
+
+# Check configuration
+sudo postfix check
+
+# Restart Postfix
+sudo systemctl restart postfix
+
+# View all parameters
+postconf
+
+# View specific parameter
+postconf -n parameter_name
+
+# Build lookup table
+sudo postmap /etc/postfix/filename
+
+# Test mail routing
+postmap -q address@example.com hash:/etc/postfix/virtual
+
+# Flush queue (retry deferred)
+postfix flush
+
+# View mail queue
+mailq
+
+# Stop Postfix
+sudo systemctl stop postfix
+```
+
+---
+
+## Next Steps
+
+**Basic Setup:**
+- Install and test local Postfix
+- Configure Laravel Mail to use local Postfix
+- Test sending emails from Laravel
+
+**Production Hardening:**
+- Install TLS certificates (Let's Encrypt)
+- Configure SASL authentication
+- Set up SPF, DKIM, DMARC records
+- Enable postscreen for spam filtering
+
+**Advanced Configuration:**
+- Set up virtual domains
+- Implement database lookups
+- Configure content filtering
+- Integrate with policy daemons
+
+---
+
+## Resources
+
+- [Official Postfix Documentation](http://www.postfix.org/documentation.html)
+- [Postfix Configuration Parameters](http://www.postfix.org/postconf.5.html)
+- [Laravel Mail Documentation](https://laravel.com/docs/mail)
+- [DKIM Implementation Guide](https://tools.ietf.org/html/rfc6376)
+- [SPF Record Syntax](https://tools.ietf.org/html/rfc7208)

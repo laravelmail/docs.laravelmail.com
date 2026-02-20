@@ -10,7 +10,7 @@ import sitemap from "@astrojs/sitemap";
 
 // https://astro.build/config
 export default defineConfig({
-    site: "https://celestialdocs.hyperoot.dev",
+    site: "https://docs.laravelmail.com",
     prefetch: true,
     vite: {
         plugins: [tailwindcss()],

@@ -1,0 +1,835 @@
+---
+title: Configuring Sendmail for Laravel
+description: Sendmail is a classic Mail Transfer Agent (MTA) with a long history in Unix-based systems. While modern alternatives like Postfix and Exim dominate new deployme
+---
+
+# Configuring Sendmail for Laravel
+
+## Overview
+
+Sendmail is a classic Mail Transfer Agent (MTA) with a long history in Unix-based systems. While modern alternatives like Postfix and Exim dominate new deployments, Sendmail remains valuable for legacy systems, deep customization, and specific integration scenarios.
+
+**This guide is not a recommendation to use Sendmail everywhere**, but rather a comprehensive reference for developers who need to configure it—whether working with legacy systems, complex requirements, or custom mail handling.
+
+### When to Use Sendmail
+
+✅ **Good use cases:**
+- Integrating with existing Sendmail infrastructure
+- Advanced customization and local mail handling
+- Legacy systems requiring Sendmail compatibility
+- Direct SMTP control without external services
+
+❌ **Not recommended for:**
+- New deployments (use Postfix or Exim instead)
+- Simple hosting setups (use managed SMTP services)
+- Beginners (Postfix is much simpler)
+
+---
+
+## System Requirements
+
+Before installing Sendmail, ensure:
+
+| Component | Requirement | Notes |
+|-----------|-------------|-------|
+| **OS** | Linux, BSD, macOS | Unix-based systems only |
+| **RAM** | 256 MB minimum | 512 MB+ recommended |
+| **Disk** | 1 GB minimum | For queue and logs |
+| **m4 macro processor** | Required | `sudo apt-get install m4` |
+| **PHP** | 5.2+ | For `proc_open()` function |
+
+### Key Limitation
+
+**Important:** Laravel's Sendmail transport uses `proc_open()`, a PHP function that must be enabled. If disabled in `php.ini` (common in shared hosting), you cannot use Sendmail with Laravel.
+
+---
+
+## Installation
+
+### Install Sendmail
+
+**Ubuntu/Debian:**
+```bash
+sudo apt-get update
+sudo apt-get install sendmail sendmail-bin m4
+sudo systemctl enable sendmail
+sudo systemctl start sendmail
+```
+
+**CentOS/RHEL:**
+```bash
+sudo yum install sendmail sendmail-cf m4
+sudo systemctl enable sendmail
+sudo systemctl start sendmail
+```
+
+**Verify installation:**
+```bash
+sendmail -v
+```
+
+---
+
+## Understanding Sendmail Configuration
+
+### `.mc` vs `.cf` Files
+
+Sendmail's configuration system is unique and often confusing:
+
+| File Type | Purpose | Editable? |
+|-----------|---------|-----------|
+| **`.mc` file** | Human-readable configuration | ✅ Yes (edit this) |
+| **`.cf` file** | Compiled by m4; used by Sendmail | ❌ No (don't edit directly) |
+
+**The workflow:**
+```
+.mc file → m4 processor → .cf file → Sendmail reads .cf
+```
+
+### The m4 Macro Processor
+
+Sendmail uses `m4` to compile `.mc` files into `.cf` files. Key concepts:
+
+- **Processes as stream** — Order of directives matters
+- **`dnl` command** — "Delete through newline"; used for comments
+- **Macro expansion** — Happens even in comments; can cause surprises
+
+**Convert .mc to .cf:**
+```bash
+m4 /etc/mail/cf/m4/cf.m4 sendmail.mc > sendmail.cf
+```
+
+---
+
+## Basic `.mc` File Structure
+
+A proper Sendmail `.mc` file follows this order:
+
+```m4
+# Version control
+VERSIONID(`$Id: example.mc,v 1.0 2024/01/01 $')dnl
+
+# Operating system (REQUIRED)
+OSTYPE(`linux')dnl
+
+# Domain configuration (optional but recommended)
+DOMAIN(`generic')dnl
+
+# Feature definitions (must come before MAILER)
+FEATURE(`use_cw_file')dnl
+FEATURE(`mailertable')dnl
+FEATURE(`virtusertable')dnl
+
+# Macro definitions (depends on FEATURE)
+define(`SMART_HOST', `smtp.example.com')dnl
+define(`MAIL_HUB', `mail.example.com')dnl
+
+# Local customizations
+LOCAL_CONFIG
+# Custom rules here
+
+# Mailer definitions (MUST BE LAST)
+MAILER(`local')dnl
+MAILER(`smtp')dnl
+```
+
+**Critical rule:** Place `MAILER()` directives last. Features that depend on macros must come before those macros are used.
+
+---
+
+## Essential Configuration Directives
+
+### OSTYPE (Required)
+
+Specifies the operating system. This is **mandatory** and controls paths, flags, and defaults.
+
+```m4
+OSTYPE(`linux')dnl
+```
+
+**Common values:**
+- `linux` — Linux systems
+- `bsd44` — BSD variants
+- `solaris` — Solaris/SunOS
+- `hpux` — HP-UX
+- `aix` — IBM AIX
+
+Without `OSTYPE`, the build will fail.
+
+### DOMAIN (Optional but Recommended)
+
+Sets domain-specific configurations like local names and masquerading:
+
+```m4
+DOMAIN(`generic')dnl
+```
+
+Or custom domain (create `/etc/mail/domain/example.com.m4`):
+
+```m4
+DOMAIN(`example.com')dnl
+```
+
+### MAILER (Required)
+
+Defines which mailers Sendmail uses. `local` is included by default, but you must explicitly include `smtp` for outgoing mail:
+
+```m4
+MAILER(`local')dnl
+MAILER(`smtp')dnl
+```
+
+**Available mailers:**
+- `local` — Local delivery (included automatically)
+- `smtp` — SMTP variants (smtp, esmtp, smtp8, dsmtp, relay)
+- `uucp` — UUCP delivery (legacy)
+- `procmail` — Pipe to procmail
+- `cyrus` — Cyrus mailbox format
+- `fax` — HylaFAX delivery
+
+### FEATURE Macros
+
+Enable optional functionality:
+
+```m4
+FEATURE(`use_cw_file')dnl           # Read /etc/mail/local-host-names
+FEATURE(`use_ct_file')dnl           # Read trusted users
+FEATURE(`mailertable')dnl           # Enable mailer table routing
+FEATURE(`virtusertable')dnl         # Virtual domain hosting
+FEATURE(`always_add_domain')dnl     # Add domain to local addresses
+FEATURE(`generics_entire_domain')dnl # Apply generics to subdomains
+```
+
+---
+
+## Configuration for Laravel
+
+### Step 1: Create/Edit `.mc` File
+
+Create `/etc/mail/sendmail.mc`:
+
+```m4
+VERSIONID(`$Id: sendmail.mc,v 1.0 2024/01/01 $')dnl
+OSTYPE(`linux')dnl
+DOMAIN(`generic')dnl
+
+FEATURE(`use_cw_file')dnl
+FEATURE(`mailertable')dnl
+FEATURE(`always_add_domain')dnl
+
+define(`confLOG_LEVEL', `9')dnl
+define(`confDOMAIN_NAME', `example.com')dnl
+
+LOCAL_CONFIG
+# Local rules can go here
+
+MAILER(`local')dnl
+MAILER(`smtp')dnl
+```
+
+### Step 2: Compile to `.cf` File
+
+```bash
+cd /etc/mail
+m4 m4/cf.m4 sendmail.mc > sendmail.cf
+sudo chown root:wheel sendmail.cf
+sudo chmod 644 sendmail.cf
+```
+
+### Step 3: Restart Sendmail
+
+```bash
+sudo systemctl restart sendmail
+```
+
+### Step 4: Configure Laravel
+
+Update `.env`:
+
+```env
+MAIL_MAILER=sendmail
+MAIL_SENDMAIL="/usr/sbin/sendmail -bs"
+```
+
+Update `config/mail.php`:
+
+```php
+return [
+    'default' => env('MAIL_MAILER', 'sendmail'),
+    'mailers' => [
+        'sendmail' => [
+            'transport' => 'sendmail',
+            'path' => env('MAIL_SENDMAIL', '/usr/sbin/sendmail -bs'),
+        ],
+    ],
+];
+```
+
+Clear Laravel's configuration cache:
+
+```bash
+php artisan config:cache
+```
+
+---
+
+## Address Rewriting and Masquerading
+
+### Masquerading (Hiding Internal Addresses)
+
+Rewrite outgoing mail addresses to appear to come from your domain:
+
+```m4
+MASQUERADE_AS(`example.com')dnl
+FEATURE(`masquerade_envelope')dnl  # Masquerade envelope too
+```
+
+**Example:**
+- Internal user: `john@mail.example.com`
+- Appears as: `john@example.com`
+
+### Masquerade Exceptions
+
+Exclude certain hosts from masquerading:
+
+```m4
+MASQUERADE_EXCEPTION(`localhost')dnl
+MASQUERADE_EXCEPTION(`mail.example.com')dnl
+```
+
+### Generic Maps (Address Rewriting)
+
+Rewrite local addresses to different domains:
+
+**Create `/etc/mail/genericstable`:**
+
+```
+root                admin@example.com
+www-data            web@example.com
+@localhost          user@example.com
+```
+
+**Add to `.mc` file:**
+
+```m4
+FEATURE(`generics_entire_domain')dnl
+define(`GENERICS_TABLE_DOMAIN_NAMES', `example.com')dnl
+```
+
+**Build the map:**
+
+```bash
+makemap hash /etc/mail/genericstable < /etc/mail/genericstable
+sudo systemctl restart sendmail
+```
+
+---
+
+## Virtual Domains
+
+### Virtual User Table
+
+Host multiple domains without creating system users:
+
+**Create `/etc/mail/virtusertable`:**
+
+```
+support@example.com         localuser
+admin@example.net           admin@example.com
+error@another.org           /dev/null
+info@              error    "550 No such user here"
+```
+
+**Add to `.mc` file:**
+
+```m4
+FEATURE(`virtusertable')dnl
+```
+
+**Build the map:**
+
+```bash
+makemap hash /etc/mail/virtusertable < /etc/mail/virtusertable
+sudo systemctl restart sendmail
+```
+
+**Map entries explained:**
+- `address@domain    username` — Deliver to local user
+- `address@domain    user@other.com` — Forward to external address
+- `address@domain    /dev/null` — Silently discard
+- `@domain    error "message"` — Reject with error message
+
+---
+
+## Relaying and Routing
+
+### Smart Host (Central Relay)
+
+Send all outgoing mail through a relay server:
+
+```m4
+define(`SMART_HOST', `smtp.isp.com')dnl
+```
+
+### Mail Hub (Local Host Relay)
+
+Send mail for local hostnames to a central hub:
+
+```m4
+define(`MAIL_HUB', `mailhub.example.com')dnl
+```
+
+### Local Relay (Unqualified Names)
+
+Forward unqualified addresses (just username) to a relay:
+
+```m4
+define(`LOCAL_RELAY', `relay.example.com')dnl
+```
+
+---
+
+## Mailer Tables
+
+Route mail for specific domains to different mail servers:
+
+**Create `/etc/mail/mailertable`:**
+
+```
+.example.com        smtp:mail.example.com
+partner.com         smtp:[partner-mail.com]:2525
+legacy.org          uucp-new:legacyhost!
+.                   smtp:[smtp.isp.com]
+```
+
+**Add to `.mc` file:**
+
+```m4
+FEATURE(`mailertable')dnl
+```
+
+**Build the map:**
+
+```bash
+makemap hash /etc/mail/mailertable < /etc/mail/mailertable
+sudo systemctl restart sendmail
+```
+
+**Syntax:**
+- `.domain` — Matches domain and subdomains
+- `domain` — Exact match only
+- `.` — Default/catch-all
+
+---
+
+## Security Configuration
+
+### TLS/STARTTLS
+
+Enable encrypted SMTP connections:
+
+```m4
+define(`confCACERT_PATH', `/etc/ssl/certs')dnl
+define(`confCACERT', `/etc/ssl/certs/ca-certificates.crt')dnl
+define(`confSERVER_CERT', `/etc/letsencrypt/live/mail.example.com/fullchain.pem')dnl
+define(`confSERVER_KEY', `/etc/letsencrypt/live/mail.example.com/privkey.pem')dnl
+```
+
+### SMTP Authentication
+
+Allow authenticated relay (combat spam):
+
+```m4
+define(`confAUTH_MECHANISMS', `EXTERNAL GSSAPI DIGEST-MD5 CRAM-MD5 LOGIN PLAIN')dnl
+define(`confAUTH_OPTIONS', `A p')dnl
+```
+
+### Anti-Spam Rules
+
+Restrict relaying to authorized users:
+
+```m4
+FEATURE(`relay_hosts_only')dnl
+FEATURE(`loose_relay_check')dnl
+
+LOCAL_CONFIG
+R$*                $: $&\&#123;client_name\&#125;
+```
+
+---
+
+## Custom Rulesets
+
+### LOCAL_RULE_3 (Canonicalization)
+
+Customize address canonicalization:
+
+```m4
+LOCAL_RULE_3
+# Map old hosts to new domains
+R$* @ oldhost $*    $1 @ newhost.example.com $2
+```
+
+### LOCAL_RULESETS (Custom Rules)
+
+Add completely custom rulesets:
+
+```m4
+LOCAL_RULESETS
+
+Scheck_from_ok
+R$*                $: ok
+```
+
+### LOCAL_CONFIG (Custom Declarations)
+
+Define custom maps and variables:
+
+```m4
+LOCAL_CONFIG
+KscheduleMap hash -o /etc/mail/schedulemap
+Kldap ldap -1 -v sendmailMTAmap -b dc=example,dc=com
+```
+
+---
+
+## Using Lookup Tables
+
+### Berkeley DB Maps
+
+Default map type for most Sendmail configurations:
+
+```bash
+makemap hash /etc/mail/mapname < /etc/mail/mapname.txt
+```
+
+### Change Default Map Type
+
+```m4
+define(`DATABASE_MAP_TYPE', `dbm')dnl
+```
+
+### LDAP Integration
+
+Query LDAP directory for lookups:
+
+```m4
+LOCAL_CONFIG
+Kldap_aliases ldap -1 -v mail -b ou=aliases,dc=example,dc=com
+Kldap_users ldap -1 -v mailLocalAddress -b ou=people,dc=example,dc=com
+```
+
+---
+
+## Troubleshooting Sendmail
+
+### Check Sendmail Status
+
+```bash
+sudo systemctl status sendmail
+netstat -tulnp | grep sendmail
+```
+
+### View Sendmail Logs
+
+```bash
+# Real-time monitoring
+sudo tail -f /var/log/mail.log
+
+# Search for errors
+grep "ERROR" /var/log/mail.log
+
+# Find rejected mail
+grep "reject" /var/log/mail.log
+
+# Trace a specific message
+grep "MESSAGE_ID" /var/log/mail.log
+```
+
+### Increase Log Level
+
+Add to `.mc` file:
+
+```m4
+define(`confLOG_LEVEL', `9')dnl
+```
+
+Then recompile and restart.
+
+### Test Email Sending
+
+Manually test Sendmail:
+
+```bash
+echo "Subject: Test Email
+
+This is a test." | sendmail -v recipient@example.com
+```
+
+### Verify Configuration
+
+Check syntax before restarting:
+
+```bash
+sendmail -C /etc/mail/sendmail.cf -bi
+```
+
+### Common Issues and Solutions
+
+**Issue: "sendmail not found"**
+```bash
+sudo apt-get install sendmail sendmail-bin
+```
+
+**Issue: "Emails not sending from Laravel"**
+- Check `proc_open()` is not disabled in `php.ini`
+- Verify `/usr/sbin/sendmail` exists and is executable
+- Check web server user can execute sendmail
+- Review logs: `tail -f /var/log/mail.log`
+
+**Issue: "Permission denied on sendmail"**
+```bash
+sudo chmod 4755 /usr/sbin/sendmail
+sudo chown root:smmsp /usr/sbin/sendmail
+```
+
+**Issue: ".cf file not found" errors**
+- Ensure you compiled `.mc` to `.cf`: `m4 /etc/mail/cf/m4/cf.m4 sendmail.mc > sendmail.cf`
+- Restart Sendmail after moving `.cf` file
+- Check file permissions: `sudo chmod 644 /etc/mail/sendmail.cf`
+
+**Issue: "Relay access denied"**
+- Check SMART_HOST configuration
+- Verify MASQUERADE_AS is set if needed
+- Review access database: `makemap -q hash /etc/mail/access`
+
+---
+
+## Working with the Mail Queue
+
+### View Queue
+
+```bash
+# List all queued messages
+mailq
+
+# Count messages
+mailq | wc -l
+
+# Show just message IDs
+mailq | grep "^[A-F0-9]"
+```
+
+### Flush Queue (Force Delivery)
+
+```bash
+# Retry all messages
+sendmail -q
+
+# Force immediate processing
+sendmail -q -v
+
+# Process specific queue run
+sendmail -qI <QUEUE_ID>
+```
+
+### Remove Stuck Messages
+
+```bash
+# Remove specific message
+sudo rm /var/spool/postfix/deferred/<QUEUE_ID>
+
+# Clear entire queue (dangerous!)
+sudo rm /var/spool/postfix/deferred/*
+```
+
+---
+
+## System Mail Forwarding
+
+Redirect system mail (cron, services) to real person:
+
+**Create/Edit `/etc/aliases`:**
+
+```
+root: admin@example.com, admin@backup-domain.com
+www-data: web-admin@example.com
+```
+
+**Build the alias database:**
+
+```bash
+sudo newaliases
+```
+
+This ensures important system messages reach administrators, not root's inbox.
+
+---
+
+## Performance Tuning
+
+### Connection Settings
+
+```m4
+define(`confTO_CONNECT', `10s')dnl
+define(`confTO_INITIAL', `10s')dnl
+define(`confTO_QUEUERETURN', `5d')dnl
+define(`confMAX_HEADERS_LENGTH', `32768')dnl
+```
+
+### Concurrency Limits
+
+```m4
+define(`confMAX_DAEMON_CHILDREN', `20')dnl
+define(`confMAX_QUEUE_CHILDREN', `20')dnl
+define(`confQUEUE_LA', `8')dnl
+define(`confREFUSE_LA', `12')dnl
+```
+
+### Process Limits
+
+```m4
+define(`confMAX_MESSAGE_SIZE', `100000000')dnl
+define(`confNO_RCPT_ACTION', `add-to-undisclosed')dnl
+```
+
+---
+
+## Best Practices
+
+### Configuration Management
+
+✅ **Do:**
+- Keep `.mc` files in version control
+- Backup `/etc/mail/sendmail.cf` before changes
+- Test configuration in development first
+- Document all customizations
+- Use `m4` to compile, never edit `.cf` directly
+
+❌ **Don't:**
+- Edit `.cf` files directly
+- Forget to rebuild when modifying `.mc`
+- Use Sendmail on shared hosting (if `proc_open` is disabled)
+- Keep passwords in `.mc` files unencrypted
+
+### Security Checklist
+
+- [ ] Run Sendmail as unprivileged user (sendmail)
+- [ ] Restrict file permissions: `chmod 600` for sensitive files
+- [ ] Enable TLS for SMTP connections
+- [ ] Implement SASL authentication for relaying
+- [ ] Configure SPF and DKIM records
+- [ ] Monitor logs regularly
+- [ ] Keep Sendmail updated
+- [ ] Test open relay prevention
+
+### Monitoring
+
+Regular checks to perform:
+
+```bash
+# Queue health
+mailq | grep "^[A-F0-9]" | wc -l
+
+# Recent errors
+grep "ERROR" /var/log/mail.log | tail -20
+
+# Authentication attempts
+grep "AUTH" /var/log/mail.log | tail -10
+
+# Rejected messages
+grep "reject" /var/log/mail.log | tail -10
+```
+
+---
+
+## Advanced Topics
+
+### LDAP-Based Routing
+
+Implement LDAP-based email routing with:
+
+```m4
+FEATURE(`ldap_routing')dnl
+LOCAL_CONFIG
+Kldaproute ldap -1 -v mailLocalAddress
+```
+
+### Mail Filters (Milters)
+
+Integrate SpamAssassin or other mail filters:
+
+```m4
+define(`confINPUT_MAIL_FILTERS', `spamcheck')dnl
+define(`confMILTER_DEFAULT_ACTION', `accept')dnl
+```
+
+### Queue Groups
+
+Organize queue by destination:
+
+```m4
+QUEUE_GROUP(`fast', `P=/var/spool/mqueue-fast, F=')dnl
+QUEUE_GROUP(`slow', `P=/var/spool/mqueue-slow, F=')dnl
+```
+
+---
+
+## Migration Guide
+
+### From Sendmail to Postfix
+
+If moving away from Sendmail:
+
+1. Back up all Sendmail configs and maps
+2. Set up Postfix with equivalent configuration
+3. Test mail flow on development system
+4. Plan cutover during low-traffic window
+5. Monitor logs for issues
+6. Keep Sendmail running as backup initially
+7. Redirect SMTP port to Postfix when confident
+
+---
+
+## Quick Reference
+
+### Common `.mc` Directives
+
+```m4
+VERSIONID(`...')           # Version control
+OSTYPE(`linux')            # Operating system
+DOMAIN(`generic')          # Domain configuration
+FEATURE(`use_cw_file')     # Read /etc/mail/local-host-names
+FEATURE(`mailertable')     # Enable mailer routing
+FEATURE(`virtusertable')   # Virtual domains
+MAILER(`local')            # Local delivery
+MAILER(`smtp')             # SMTP delivery
+define(`SMART_HOST', `...')        # Relay server
+define(`MASQUERADE_AS', `...')     # Masquerade domain
+```
+
+### Common Files
+
+- `/etc/mail/sendmail.mc` — Source configuration
+- `/etc/mail/sendmail.cf` — Compiled configuration
+- `/etc/mail/local-host-names` — Accepted hostnames
+- `/etc/mail/genericstable` — Address rewriting
+- `/etc/mail/virtusertable` — Virtual domains
+- `/etc/mail/mailertable` — Routing rules
+- `/etc/aliases` — Local aliases
+- `/var/log/mail.log` — Sendmail logs
+- `/var/spool/mqueue/` — Mail queue
+
+### Common Commands
+
+```bash
+m4 /etc/mail/cf/m4/cf.m4 sendmail.mc > sendmail.cf    # Compile
+makemap hash /etc/mail/mapname < /etc/mail/mapname.txt # Build maps
+newaliases                                               # Rebuild aliases
+sendmail -C /etc/mail/sendmail.cf -bi                   # Verify
+mailq                                                     # View queue
+sendmail -q                                               # Flush queue
+sudo systemctl restart sendmail                          # Restart
+```
+
+---

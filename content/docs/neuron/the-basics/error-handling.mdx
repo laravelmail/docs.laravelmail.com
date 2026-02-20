@@ -1,0 +1,22 @@
+---
+description: Managing errors fired by your agent.
+title: Error Handling
+---
+
+# Error Handling
+
+All exceptions fired from Neuron AI  are an extension of `NeuronException` . There several type of exception that can help you understand unexpected errors, but since they inherit from the same root exception gives you the ability to precisely catch agent errors in the context of your code:
+
+```php
+try \&#123;
+
+    // Your code here...
+
+\&#125; catch (NeuronAI\Exceptions\NeuronException $e) \&#123;
+    // catch all the exception generated just from the agent
+\&#125; catch (NeuronAI\Exceptions\ProviderException $e) \&#123;
+    // Fired from AI providers and embedding providers
+\&#125;
+```
+
+If you want to be alerted on any error, consider to connect Inspector to your Agent instance. Learn more at the [**Observability**](observability.md) section.

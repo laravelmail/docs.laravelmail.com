@@ -1,140 +1,365 @@
 ---
 import { Icon } from "astro-icon/components";
-
 import { Button } from "@/components/ui/button";
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import PromoBanner from "@/components/marketing/PromoBanner.astro";
+import FeatureRow from "@/components/marketing/FeatureRow.astro";
+import ProcessStep from "@/components/marketing/ProcessStep.astro";
+import TestimonialCard from "@/components/marketing/TestimonialCard.astro";
+import FAQ from "@/components/marketing/FAQ.astro";
+import PurchaseToast from "@/components/marketing/PurchaseToast.astro";
 
-const HERO_TITLE = "CelestialDocs";
-const HERO_SUBTITLE =
-    "A modern, type-safe documentation system with hierarchical navigation, hybrid generation, and multi-collection support.";
-const CTA_PRIMARY = { href: "/docs/introduction", label: "View Documentation" };
-const CTA_SECONDARY = {
-    href: "https://github.com/HYP3R00T/CelestialDocs",
-    label: "View on GitHub",
-};
+const TITLE = "Laravel Mail Documentation";
+const DESCRIPTION = "The Ultimate Self-Hosted Laravel Email Marketing Solution for Business Growth";
+const PRICE = "£10.00";
 ---
 
 <BaseLayout
-    title={`${HERO_TITLE} - Modern documentation template`}
-    description={HERO_SUBTITLE}
+    title={`${TITLE} - Modern marketing platform`}
+    description={DESCRIPTION}
     image="/docs-hero.jpg"
-    imageAlt="CelestialDocs documentation template hero"
 >
+    <!-- Social Proof Toast -->
+    <PurchaseToast />
+
     <!-- Hero Section -->
-    <section class="mx-auto max-w-6xl px-5 py-8 sm:py-12">
-        <div class="space-y-8">
-            <div class="space-y-4">
-                <h1
-                    class="text-foreground text-5xl leading-tight font-bold tracking-tight sm:text-6xl lg:text-7xl"
+    <section
+        class="border-border from-primary/5 via-background to-background relative overflow-hidden border-b bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] pt-20 pb-24 md:pt-32 md:pb-40"
+    >
+        <div class="relative z-10 mx-auto max-w-7xl space-y-10 px-6 text-center">
+            <div class="space-y-6">
+                <div
+                    class="inline-flex animate-bounce items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/10 px-4 py-1.5 text-xs font-black tracking-widest text-orange-600 uppercase"
                 >
-                    {HERO_TITLE}
+                    🔥 Early Bird Offer: Save 90% Today
+                </div>
+                <h1
+                    class="text-foreground text-5xl leading-[0.9] font-black tracking-tighter md:text-7xl lg:text-8xl"
+                >
+                    {TITLE}
                 </h1>
-                <p class="text-muted-foreground mx-auto max-w-2xl text-xl">
-                    Modern documentation that scales with your project
+                <p class="text-muted-foreground mx-auto max-w-3xl text-xl font-medium md:text-2xl">
+                    The only platform in the world that combines self-hosted Laravel email marketing
+                    with <strong>Local AI Marketing Agents</strong> powered by Ollama.
+                </p>
+                <p class="text-foreground/60 mx-auto max-w-2xl text-sm leading-relaxed">
+                    Complete data privacy with enterprise-grade automation for your laravel
+                    marketing needs. Learn more about our Laravel solutions.
                 </p>
             </div>
 
-            <div class="flex flex-col items-center justify-center gap-3 sm:flex-row">
-                <Button size="lg">
-                    <a href={CTA_PRIMARY.href}>Get Started</a>
+            <div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
+                <Button
+                    size="xl"
+                    class="shadow-primary/20 h-14 w-full px-10 text-lg font-bold shadow-2xl sm:w-auto"
+                >
+                    <a href="https://laravelmail.com">Purchase Now - {PRICE}</a>
                 </Button>
-                <Button size="lg" variant="secondary">
-                    <a
-                        href={CTA_SECONDARY.href}
-                        target="_blank"
-                        class="flex flex-row items-center gap-3"
+                <Button
+                    size="xl"
+                    variant="outline"
+                    class="h-14 w-full px-10 text-lg font-bold sm:w-auto"
+                >
+                    <a href="/docs">Read Documentation</a>
+                </Button>
+            </div>
+
+            <div
+                class="grid grid-cols-2 gap-8 pt-20 opacity-60 grayscale transition-all duration-700 hover:grayscale-0 lg:grid-cols-4"
+            >
+                <div class="group flex cursor-default flex-col items-center gap-1">
+                    <span
+                        class="text-foreground group-hover:text-primary text-3xl font-black transition-colors"
+                        >100%</span
                     >
-                        View on GitHub
-                        <Icon name="github" />
-                    </a>
+                    <span
+                        class="text-muted-foreground text-[10px] font-black tracking-widest uppercase"
+                        >Open Source</span
+                    >
+                </div>
+                <div class="group flex cursor-default flex-col items-center gap-1">
+                    <span
+                        class="text-foreground group-hover:text-primary text-3xl font-black transition-colors"
+                        >4.6K+</span
+                    >
+                    <span
+                        class="text-muted-foreground text-[10px] font-black tracking-widest uppercase"
+                        >Installations</span
+                    >
+                </div>
+                <div class="group flex cursor-default flex-col items-center gap-1">
+                    <span
+                        class="text-foreground group-hover:text-primary text-3xl font-black transition-colors"
+                        >5M+</span
+                    >
+                    <span
+                        class="text-muted-foreground text-[10px] font-black tracking-widest uppercase"
+                        >Messages Sent Daily</span
+                    >
+                </div>
+                <div class="group flex cursor-default flex-col items-center gap-1">
+                    <span
+                        class="text-foreground group-hover:text-primary text-3xl font-black transition-colors"
+                        >Verified</span
+                    >
+                    <span
+                        class="text-muted-foreground text-[10px] font-black tracking-widest uppercase"
+                        >GDPR Compliant</span
+                    >
+                </div>
+            </div>
+        </div>
+
+        <!-- Decorative abstract background -->
+        <div
+            class="bg-primary/5 absolute top-1/2 left-1/2 -z-10 h-[600px] w-[1000px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[120px]"
+        >
+        </div>
+    </section>
+
+    <!-- Value Proposition -->
+    <section class="bg-muted/30 border-border border-b py-24">
+        <div class="mx-auto max-w-4xl space-y-8 px-6 text-center">
+            <h2
+                class="text-foreground text-3xl leading-tight font-black tracking-tight md:text-5xl"
+            >
+                Marketing Automation Platform Across Every Channel
+            </h2>
+            <p class="text-muted-foreground text-lg leading-relaxed">
+                From WhatsApp marketing broadcasts and Instagram DM automation to Google Marketplace
+                listings and smart product-driven campaigns — Laravel Mail is the best email
+                marketing service and email marketing platform for every business size.
+            </p>
+            <p class="text-muted-foreground">
+                Whether you need email marketing for small business, the best email marketing
+                softwares for enterprise, or free email marketing services — our automated email
+                marketing platform combines powerful email marketing solutions with an email
+                marketing agency toolkit.
+            </p>
+        </div>
+    </section>
+
+    <!-- Deep Dive Features -->
+    <FeatureRow
+        title="WhatsApp + Instagram"
+        subtitle="Smart Messaging Automation"
+        description="Official Facebook Partner Login — run WhatsApp Business campaigns, Instagram DM automation, comment replies, and story mentions from one dashboard."
+        benefits={[
+            "WhatsApp Broadcasts & Flows",
+            "Instagram Auto-Replies & Mentions",
+            "Shared Team Inbox",
+        ]}
+        tagline="automated email marketing • marketing automation platform"
+        icon="mail"
+    />
+
+    <FeatureRow
+        title="Google Marketplace & Products"
+        subtitle="Product-Driven Email Campaigns"
+        description="Seamlessly integrate with Google Workspace Marketplace to manage campaigns and authenticated sending. Use Google OAuth to securely deliver content."
+        benefits={[
+            "One-click Google Marketplace deployment",
+            "Product catalog + checkout in emails",
+            "Dynamic pricing & inventory sync",
+        ]}
+        tagline="email marketing platform • email marketing solutions"
+        reverse={true}
+        icon="check"
+    />
+
+    <FeatureRow
+        title="SaaS & Agencies"
+        subtitle="White-Label Email Marketing Software"
+        description="Multi-tenant workspaces, white-label templates, client billing, and the most beautiful automation builder for email marketing agencies."
+        benefits={[
+            "Drag-and-drop visual automation builder",
+            "Unlimited clients & workspaces",
+            "White-label + custom domains",
+        ]}
+        tagline="best email marketing softwares • email marketing agency"
+        icon="more-horizontal"
+    />
+
+    <FeatureRow
+        title="AI Marketing Agents"
+        subtitle="Privacy-First Advanced Automation"
+        description="The only platform in the world that allows you to deploy autonomous AI agents for lead scoring and content generation using Ollama. Run models 100% locally."
+        benefits={[
+            "Privacy-first Ollama integration",
+            "Autonomous lead nurturing agents",
+            "Local AI content generation",
+        ]}
+        tagline="ai marketing agents • local ai automation • ollama marketing"
+        reverse={true}
+        icon="logo"
+    />
+
+    <!-- Why Choose Us -->
+    <section class="bg-background py-24">
+        <div class="mx-auto max-w-7xl px-6">
+            <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
+                <div class="space-y-4">
+                    <div
+                        class="bg-primary/10 text-primary flex h-12 w-12 items-center justify-center rounded-xl text-xl font-bold"
+                    >
+                        🎯
+                    </div>
+                    <h3 class="text-xl font-bold">Best Email Marketing Service</h3>
+                    <p class="text-muted-foreground text-sm leading-relaxed">
+                        Powerful automation tools designed for modern businesses of all sizes.
+                    </p>
+                </div>
+                <div class="space-y-4">
+                    <div
+                        class="bg-primary/10 text-primary flex h-12 w-12 items-center justify-center rounded-xl text-xl font-bold"
+                    >
+                        💼
+                    </div>
+                    <h3 class="text-xl font-bold">Email Marketing for Small Business</h3>
+                    <p class="text-muted-foreground text-sm leading-relaxed">
+                        Affordable, scalable solutions that grow with your business needs.
+                    </p>
+                </div>
+                <div class="space-y-4">
+                    <div
+                        class="bg-primary/10 text-primary flex h-12 w-12 items-center justify-center rounded-xl text-xl font-bold"
+                    >
+                        🚀
+                    </div>
+                    <h3 class="text-xl font-bold">Automated Email Marketing</h3>
+                    <p class="text-muted-foreground text-sm leading-relaxed">
+                        Intelligent workflows that save time and increase conversion rates.
+                    </p>
+                </div>
+                <div class="space-y-4">
+                    <div
+                        class="bg-primary/10 text-primary flex h-12 w-12 items-center justify-center rounded-xl text-xl font-bold"
+                    >
+                        📊
+                    </div>
+                    <h3 class="text-xl font-bold">Email Marketing Solutions</h3>
+                    <p class="text-muted-foreground text-sm leading-relaxed">
+                        Complete suite of tools from campaigns to analytics and compliance.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Process: Purchase -->
+    <section id="purchase" class="bg-muted/40 border-border border-y py-24">
+        <div class="mx-auto max-w-7xl space-y-20 px-6">
+            <div class="space-y-4 text-center">
+                <h2 class="text-3xl font-black tracking-tight md:text-5xl">
+                    How Laravel Mail Marketing Works
+                </h2>
+                <p class="text-muted-foreground mx-auto max-w-2xl text-lg italic">
+                    Set up your self-hosted Laravel Mail marketing solution in just three simple
+                    steps – connect, configure, and launch.
+                </p>
+            </div>
+
+            <div class="relative grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
+                <!-- Decorative line -->
+                <div class="bg-border absolute top-8 right-0 left-0 -z-10 hidden h-px lg:block">
+                </div>
+
+                <ProcessStep
+                    number="1"
+                    title="Purchase Your License"
+                    description="Buy your self-hosted license via PayPal. Receive an instant order confirmation."
+                />
+                <ProcessStep
+                    number="2"
+                    title="Receive Docker Image"
+                    description="Get a secure download link containing the optimized Docker image and tutorials."
+                />
+                <ProcessStep
+                    number="3"
+                    title="Submit Activation Details"
+                    description="Submit your server details for license binding via your private dashboard."
+                />
+                <ProcessStep
+                    number="4"
+                    title="Activation Completed"
+                    description="Our team verifies and activates your license within 24–48 hours."
+                />
+            </div>
+
+            <div
+                class="bg-popover border-border flex flex-col items-center justify-between gap-10 rounded-3xl border p-10 md:flex-row"
+            >
+                <div class="max-w-2xl space-y-4">
+                    <div
+                        class="flex items-center gap-2 text-xs font-bold tracking-widest text-green-600 uppercase"
+                    >
+                        <span class="h-2 w-2 rounded-full bg-green-500"></span> INSTANT ACCESS AFTER PURCHASE
+                    </div>
+                    <h3 class="text-foreground text-3xl font-black tracking-tight">
+                        Secure your license for just {PRICE}
+                    </h3>
+                    <p class="text-muted-foreground">
+                        One-time purchase • Full access to source code • Lifetime access to our
+                        email-verified leads database.
+                    </p>
+                </div>
+                <Button
+                    size="xl"
+                    class="bg-foreground text-background hover:bg-foreground/90 h-16 rounded-2xl px-12 text-xl font-black shadow-xl shadow-black/10"
+                >
+                    <a href="https://laravelmail.com">Purchase Now</a>
                 </Button>
             </div>
         </div>
     </section>
 
-    <!-- Features Section -->
-    <section class="mx-auto max-w-6xl px-5 py-8 sm:py-12">
-        <div class="mb-12 text-center">
-            <h2 class="text-foreground pb-4 text-3xl font-bold sm:text-4xl">Everything you need</h2>
-            <p class="text-muted-foreground mt-3 text-lg">
-                Built with best practices and developer experience in mind
-            </p>
-        </div>
-
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <div class="bg-popover space-y-3 rounded-lg p-6">
-                <div class="text-3xl">🧭</div>
-                <h3 class="text-foreground text-lg font-semibold">Smart Navigation</h3>
-                <p class="text-muted-foreground text-sm">
-                    Hierarchical structure with tabs, groups, and breadcrumbs keeps users oriented
+    <!-- Testimonials -->
+    <section class="bg-background py-24">
+        <div class="mx-auto max-w-7xl space-y-16 px-6">
+            <div class="space-y-4 text-center">
+                <h2 class="text-foreground text-4xl font-black">Trusted by Industry Leaders</h2>
+                <p class="text-muted-foreground text-lg">
+                    See why developers and marketing teams worldwide choose Laravel Mail.
                 </p>
             </div>
-
-            <div class="bg-popover space-y-3 rounded-lg p-6">
-                <div class="text-3xl">⚡</div>
-                <h3 class="text-foreground text-lg font-semibold">Fast Setup</h3>
-                <p class="text-muted-foreground text-sm">
-                    Auto-generate or configure manually, your choice
-                </p>
-            </div>
-
-            <div class="bg-popover space-y-3 rounded-lg p-6">
-                <div class="text-3xl">🔒</div>
-                <h3 class="text-foreground text-lg font-semibold">Type Safe</h3>
-                <p class="text-muted-foreground text-sm">
-                    Strict TypeScript and Zod validation catch errors before deployment
-                </p>
-            </div>
-
-            <div class="bg-popover space-y-3 rounded-lg p-6">
-                <div class="text-3xl">🗂️</div>
-                <h3 class="text-foreground text-lg font-semibold">Multi-Collection</h3>
-                <p class="text-muted-foreground text-sm">
-                    Separate docs, guides, and API references with independent navigation
-                </p>
-            </div>
-
-            <div class="bg-popover space-y-3 rounded-lg p-6">
-                <div class="text-3xl">📝</div>
-                <h3 class="text-foreground text-lg font-semibold">MDX Support</h3>
-                <p class="text-muted-foreground text-sm">
-                    Write in Markdown with the power of React components
-                </p>
-            </div>
-
-            <div class="bg-popover space-y-3 rounded-lg p-6">
-                <div class="text-3xl">🎨</div>
-                <h3 class="text-foreground text-lg font-semibold">Beautiful UI</h3>
-                <p class="text-muted-foreground text-sm">
-                    Dark mode, responsive design, and accessible by default
-                </p>
+            <div class="mx-auto grid max-w-5xl gap-8 md:grid-cols-2">
+                <TestimonialCard
+                    name="David"
+                    role="Product Manager at SalesBridge"
+                    quote="The Laravel Mail Platform crew walked us through setup step by step. Their playbook on nurturing and converting leads has been a total game-changer."
+                />
+                <TestimonialCard
+                    name="Maria"
+                    role="CEO at Moldova"
+                    quote="We used to bleed leads in hand-offs. Now with Laravel Mail, we retain, track, and convert like pros. Feels like we built a sales engine in-house."
+                />
             </div>
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="mx-auto w-full max-w-6xl px-5 py-8 sm:py-12">
-        <div class="mb-4 text-center">
-            <h2 class="text-foreground pb-4 text-3xl font-bold sm:text-4xl">
-                Ready to get started?
-            </h2>
-            <p class="text-muted-foreground mt-3 text-lg">
-                Explore the documentation or try the live demo
-            </p>
-        </div>
-        <div class="flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button size="lg" variant="secondary">
-                <a href="/docs/introduction" class="flex flex-row items-center gap-3">
-                    Read the Docs
-                    <Icon name="right" />
-                </a>
-            </Button>
-            <Button size="lg" variant="secondary">
-                <a href="/funnydocs" class="flex flex-row items-center gap-3">
-                    View Demo
-                    <Icon name="right" />
-                </a>
-            </Button>
-        </div>
-    </section>
+    <!-- FAQ Section -->
+    <FAQ
+        questions={[
+            {
+                q: "How quickly can I send campaigns with Laravel Mail?",
+                a: "With our optimized Docker image, most users are sending their first campaign within 15 minutes of setup.",
+            },
+            {
+                q: "Does Laravel Mail support high deliverability?",
+                a: "Yes, by integrating with major providers like Amazon SES and using authenticated protocols, we ensure high inbox rates.",
+            },
+            {
+                q: "Can I integrate Laravel Mail with my CRM?",
+                a: "Absolutely. Our RESTful API and webhook support allow for seamless connection with any modern CRM or custom application.",
+            },
+            {
+                q: "What reporting features are included?",
+                a: "Get real-time tracking for opens, clicks, conversions, bounces, and detailed revenue attribution for all campaigns.",
+            },
+            {
+                q: "How does pricing work?",
+                a: "We offer a simple one-time purchase model for self-hosting, giving you lifetime access without monthly subscription fees.",
+            },
+        ]}
+    />
 </BaseLayout>

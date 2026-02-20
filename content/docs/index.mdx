@@ -1,0 +1,727 @@
+---
+title: Documentation
+description: "\"1. **Clone the repository**: `git clone ...` 2. **Start the environment**: `make rebuild` 3. **Access**: `https://localhost:13000`\""
+---
+
+# Documentation
+ 
+## Quick Start with Docker (Recommended)
+ 
+The fastest way to get Laravel Mail Platform running is via Docker. This bundles PHP 8.4, RoadRunner (Octane), MySQL, Redis, and Mailpit into a ready-to-use environment.
+
+1. **Clone the repository**: `git clone ...`
+2. **Start the environment**: `make rebuild`
+3. **Access**: `https://localhost:13000`
+
+---
+ 
+## Installation Types
+ 
+Laravel Mail Platform supports multiple deployment strategies:
+
+- **Docker (Recommended)** — Automated containerized setup using RoadRunner for high performance.
+- **Stand-Alone** — Traditional PHP/Nginx deployment on your own server.
+- **Package** — Integration into an existing Laravel app.
+
+---
+
+## System Requirements
+
+Before starting, verify your environment meets the minimum requirements:
+
+| Component | Minimum Version | Notes |
+|-----------|-----------------|-------|
+| **PHP** | 8.4+ | Modern version with required extensions |
+| **Git** | Any recent version | For cloning the repository |
+| **Composer** | 2.0+ | PHP dependency manager |
+| **MySQL** | 5.7+ | Most common database choice |
+| **PostgreSQL** | 9.4+ | Alternative to MySQL |
+| **SQLite** | 3.33+ | Good for development/testing |
+| **Web Server** | Apache or Nginx | Required to serve the application |
+
+### PHP Extensions
+
+Laravel Mail Platform requires these PHP extensions (most come standard):
+
+- `bcmath` — Mathematical operations
+- `ctype` — Character type checking
+- `curl` — HTTP requests
+- `dom` — XML/DOM manipulation
+- `fileinfo` — File type detection
+- `filter` — Input filtering
+- `gd` — Image manipulation (optional)
+- `hash` — Cryptographic hashing
+- `json` — JSON encoding/decoding
+- `mbstring` — Multi-byte string handling
+- `openssl` — Encryption and SSL/TLS
+- `pdo` — Database abstraction
+- `tokenizer` — PHP code tokenization
+- `xml` — XML parsing
+- `zip` — ZIP file handling (optional)
+
+**Check installed extensions:**
+```bash
+php -m
+```
+
+**Install missing extensions (Ubuntu/Debian):**
+```bash
+sudo apt-get install php8.3-bcmath php8.3-curl php8.3-dom php8.3-fileinfo \
+  php8.3-filter php8.3-gd php8.3-hash php8.3-json php8.3-mbstring \
+  php8.3-openssl php8.3-pdo php8.3-tokenizer php8.3-xml php8.3-zip
+```
+
+### Disk Space
+
+Allocate adequate disk space for:
+- Application code: ~200 MB
+- Database: Depends on volume (start with 5 GB)
+- Logs and temporary files: 1 GB
+- **Total minimum:** 10 GB
+
+---
+
+## Pre-Installation Checklist
+
+Before you begin, prepare:
+
+- [ ] Server with PHP 8.3+ and required extensions
+- [ ] Git installed and SSH keys configured (if cloning via SSH)
+- [ ] Database server installed and running
+- [ ] Empty database created for Laravel Mail Platform
+- [ ] Database user with full permissions on that database
+- [ ] Web server (Apache or Nginx) installed
+- [ ] Domain name pointing to your server (for production)
+- [ ] SSL certificate ready (Let's Encrypt is free)
+- [ ] 30 minutes for complete setup
+
+---
+
+## Installation Steps
+
+### Step 1: Clone the Repository
+
+Clone Laravel Mail Platform from your repository:
+
+```bash
+cd /var/www
+git clone https://github.com/laravelcompany/app.laravelmail.com.git
+cd app.laravelmail.com
+```
+
+Or via SSH (if you have SSH keys configured):
+
+```bash
+git clone git@github.com:laravelcompany/app.laravelmail.com.git
+```
+
+### Step 2: Install PHP Dependencies
+
+Navigate to the project root and install all dependencies using Composer:
+
+```bash
+cd /var/www/app.laravelmail.com
+composer install
+```
+
+This may take a few minutes. Composer will:
+- Download Laravel Mail Platform core
+- Install all required Laravel packages
+- Install supporting libraries
+- Verify compatibility
+
+**If you encounter permission errors:**
+```bash
+sudo chown -R $USER:$USER /var/www/app.laravelmail.com
+composer install
+```
+
+**If you have memory issues:**
+```bash
+COMPOSER_MEMORY_LIMIT=-1 composer install
+```
+
+### Step 3: Create Environment Configuration
+
+Copy the example environment file and update it for your setup:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and set at minimum:
+- `APP_KEY` (generate in next step)
+- `APP_URL` (your domain)
+- `DB_CONNECTION` (mysql, pgsql, or sqlite)
+- `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE`
+
+```env
+APP_NAME="Laravel Mail Platform"
+APP_URL=https://localhost:13000
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=laravel_mail
+DB_USERNAME=laravel_user
+DB_PASSWORD=your_secure_password
+
+# Enable HTTPS for Octane/Roadrunner (Development)
+OCTANE_HTTPS=true
+```
+
+> **Note:** For local development on port 13000, the application uses self-signed certificates. You will need to accept the security warning in your browser when visiting `https://localhost:13000`.
+
+See the [Configuration Guide](/docs/general/configuration) for complete `.env` setup.
+
+### Step 4: Generate Encryption Key
+
+Generate a unique encryption key for your installation:
+
+```bash
+php artisan key:generate
+```
+
+This creates `APP_KEY` in your `.env` file. This key is critical—losing it means re-entering all email service credentials.
+
+**Backup your key:**
+```bash
+grep APP_KEY .env
+```
+
+Store this value securely separate from your server.
+
+### Step 5: Create Database and User
+
+**For MySQL:**
+
+```bash
+# Connect to MySQL
+mysql -u root -p
+
+# Create database
+CREATE DATABASE laravel_mail CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+# Create user
+CREATE USER 'laravel_user'@'localhost' IDENTIFIED BY 'your_secure_password';
+
+# Grant permissions
+GRANT ALL PRIVILEGES ON laravel_mail.* TO 'laravel_user'@'localhost';
+FLUSH PRIVILEGES;
+
+# Exit
+EXIT;
+```
+
+**For PostgreSQL:**
+
+```bash
+sudo -u postgres psql
+
+CREATE DATABASE laravel_mail;
+CREATE USER laravel_user WITH PASSWORD 'your_secure_password';
+GRANT ALL PRIVILEGES ON DATABASE laravel_mail TO laravel_user;
+ALTER ROLE laravel_user SET client_encoding TO 'utf8';
+ALTER ROLE laravel_user SET default_transaction_isolation TO 'read committed';
+ALTER ROLE laravel_user SET default_transaction_deferrable TO on;
+ALTER ROLE laravel_user SET default_transaction_read_only TO off;
+\q
+```
+
+**Test the connection:**
+```bash
+php artisan tinker
+DB::connection()->getPdo()
+```
+
+If successful, you'll see connection details. If it fails, check your `.env` credentials.
+
+### Step 6: Run Database Migrations
+
+Set up the database schema:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+This creates all necessary tables and seeds initial data.
+
+> **On existing installations:** Use `php artisan migrate` to preserve schema, or the smart refresh command below to preserve data.
+
+### Step 7: Smart Database Refresh (Development)
+
+If you need to refresh your database schema (re-run migrations and seeds) but want to **preserve your existing data** (subscribers, campaigns, etc.), use the `db:smart-refresh` command:
+
+```bash
+php artisan db:smart-refresh
+```
+
+This command will:
+1. Backup your data to JSON.
+2. Wipe and re-seed the database (`migrate:fresh --seed`).
+3. Restore your data, merging it with the fresh seeds.
+
+### Step 8: Set File Permissions
+
+Ensure the web server can write to necessary directories:
+
+```bash
+# Find your web server user
+ps aux | grep -E '(apache|nginx)' | grep -v root | head -1
+
+# Set permissions (replace www-data if needed)
+sudo chown -R www-data:www-data /var/www/app.laravelmail.com
+sudo chmod -R 755 /var/www/app.laravelmail.com
+sudo chmod -R 775 /var/www/app.laravelmail.com/storage
+sudo chmod -R 775 /var/www/app.laravelmail.com/bootstrap/cache
+```
+
+### Step 8: Configure Web Server
+
+Configure your web server to serve Laravel Mail Platform from the `public` directory.
+
+#### Nginx Configuration
+
+Create `/etc/nginx/sites-available/campaigns`:
+
+```nginx
+server \&#123;
+    listen 80;
+    server_name campaigns.example.com;
+    root /var/www/app.laravelmail.com/public;
+    index index.php index.html index.htm;
+
+    # Redirect all HTTP to HTTPS
+    return 301 https://$server_name$request_uri;
+\&#125;
+
+server \&#123;
+    listen 443 ssl http2;
+    server_name campaigns.example.com;
+    root /var/www/app.laravelmail.com/public;
+    index index.php index.html index.htm;
+
+    # SSL certificates (use Let's Encrypt)
+    ssl_certificate /etc/letsencrypt/live/campaigns.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/campaigns.example.com/privkey.pem;
+
+    # Security headers
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+
+    location / \&#123;
+        try_files $uri $uri/ /index.php?$query_string;
+    \&#125;
+
+    location ~ \.php$ \&#123;
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    \&#125;
+
+    location ~ /\.ht \&#123;
+        deny all;
+    \&#125;
+\&#125;
+```
+
+Enable the site:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/campaigns /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+#### Apache Configuration
+
+Enable required modules:
+
+```bash
+sudo a2enmod rewrite
+sudo a2enmod ssl
+sudo a2enmod headers
+```
+
+Create `/etc/apache2/sites-available/campaigns.conf`:
+
+```apache
+<VirtualHost *:80>
+    ServerName campaigns.example.com
+    Redirect permanent / https://campaigns.example.com/
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName campaigns.example.com
+    DocumentRoot /var/www/app.laravelmail.com/public
+
+    SSLEngine on
+    SSLCertificateFile /etc/letsencrypt/live/campaigns.example.com/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/campaigns.example.com/privkey.pem
+
+    # Security headers
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-Content-Type-Options "nosniff"
+
+    <Directory /var/www/app.laravelmail.com/public>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+
+        <IfModule mod_rewrite.c>
+            RewriteEngine On
+            RewriteCond %\&#123;REQUEST_FILENAME\&#125; !-f
+            RewriteCond %\&#123;REQUEST_FILENAME\&#125; !-d
+            RewriteRule ^ index.php [QSA,L]
+        </IfModule>
+    </Directory>
+
+    ErrorLog $\&#123;APACHE_LOG_DIR\&#125;/campaigns-error.log
+    CustomLog $\&#123;APACHE_LOG_DIR\&#125;/campaigns-access.log combined
+</VirtualHost>
+```
+
+Enable the site:
+
+```bash
+sudo a2ensite campaigns.conf
+sudo apache2ctl configtest
+sudo systemctl reload apache2
+```
+
+### Step 9: Set Up SSL Certificate
+
+Use Let's Encrypt for free SSL (recommended):
+
+```bash
+sudo apt-get install certbot python3-certbot-nginx
+# or for Apache:
+sudo apt-get install certbot python3-certbot-apache
+
+# Generate certificate
+sudo certbot certonly --standalone -d campaigns.example.com
+
+# Auto-renewal (runs daily)
+sudo systemctl enable certbot.timer
+sudo systemctl start certbot.timer
+```
+
+### Step 10: Configure Cron Jobs (Required)
+
+Laravel Mail Platform uses background tasks. Create a cron job:
+
+```bash
+sudo crontab -e
+```
+
+Add this line:
+
+```
+* * * * * cd /var/www/app.laravelmail.com && php artisan schedule:run >> /dev/null 2>&1
+```
+
+This runs every minute and processes scheduled tasks like campaign sends and queue workers.
+
+### Step 11: Start Queue Workers
+
+Email sending uses a queue system. In production, run queue workers:
+
+```bash
+# Option 1: Manual (test only)
+php artisan queue:work --queue=message-dispatch
+
+# Option 2: Via Supervisor (production recommended)
+sudo nano /etc/supervisor/conf.d/laravel-mail.conf
+```
+
+Add to supervisor config:
+
+```ini
+[program:laravel-mail-queue]
+process_name=%(program_name)s_%(process_num)02d
+command=php /var/www/app.laravelmail.com/artisan queue:work --queue=message-dispatch --sleep=3 --tries=3
+autostart=true
+autorestart=true
+numprocs=4
+redirect_stderr=true
+stdout_logfile=/var/log/laravel-mail-queue.log
+```
+
+Then:
+
+```bash
+sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl start laravel-mail-queue:*
+```
+
+### Step 12: Verify Installation
+
+Test that everything is working:
+
+```bash
+# Check key is set
+grep APP_KEY .env | grep -v "^#"
+
+# Verify database connection
+php artisan tinker
+DB::connection()->getPdo()
+
+# Check queue workers
+php artisan queue:failed  # Should return no failures
+
+# Verify cron is set
+sudo crontab -l | grep artisan
+```
+
+Visit your domain in a browser:
+```
+https://campaigns.example.com
+```
+
+You should see the login page or setup screen.
+
+---
+
+## Post-Installation Setup
+
+### Create Admin User
+
+Run the setup command or create a user manually:
+
+```bash
+php artisan tinker
+```
+
+Then in Tinker:
+
+```php
+App\Models\User::create([
+    'name' => 'Admin User',
+    'email' => 'admin@example.com',
+    'password' => Hash::make('secure-password'),
+    'email_verified_at' => now(),
+]);
+```
+
+Or via setup command (if available):
+
+```bash
+php artisan setup
+```
+
+### Configure Email Services
+
+1. Log in to Laravel Mail Platform
+2. Go to **Settings** → **Email Services**
+3. Add your first email service (SendGrid, Postmark, etc.)
+4. See [Email Services Guide](/docs/features/email-services) for detailed setup
+
+### Set Up Initial Subscribers
+
+1. Go to **Subscribers**
+2. Import or manually add subscriber lists
+3. Optionally organize with tags
+
+---
+
+## Troubleshooting Installation
+
+### "Composer: command not found"
+
+Composer isn't installed. [Download it](https://getcomposer.org/download/):
+
+```bash
+curl -sS https://getcomposer.org/installer | php
+sudo mv composer.phar /usr/local/bin/composer
+```
+
+### "PHP version does not satisfy requirement"
+
+You have PHP < 8.3. Install PHP 8.3+:
+
+**Ubuntu/Debian:**
+```bash
+sudo add-apt-repository ppa:ondrej/php
+sudo apt-get update
+sudo apt-get install php8.3-cli php8.3-fpm
+```
+
+**CentOS/RHEL:**
+```bash
+sudo yum install php83-php-cli php83-php-fpm
+```
+
+### Database Connection Errors
+
+```bash
+# Verify credentials in .env
+cat .env | grep DB_
+
+# Test MySQL connection
+mysql -h DB_HOST -u DB_USERNAME -p DB_DATABASE
+
+# Test PostgreSQL connection
+psql -h DB_HOST -U DB_USERNAME -d DB_DATABASE
+```
+
+### "Permission denied" or "Cannot write to storage"
+
+Fix file permissions:
+
+```bash
+sudo chown -R www-data:www-data /var/www/app.laravelmail.com
+sudo chmod -R 775 /var/www/app.laravelmail.com/storage
+sudo chmod -R 775 /var/www/app.laravelmail.com/bootstrap/cache
+```
+
+### Page shows "404 Not Found"
+
+Web server isn't pointing to public directory correctly:
+
+**Nginx:** Verify `root /var/www/app.laravelmail.com/public;`
+**Apache:** Verify `DocumentRoot /var/www/app.laravelmail.com/public`
+
+### "SQLSTATE[HY000]: General error"
+
+Database migrations didn't run:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+### Emails Not Sending
+
+1. Verify queue workers are running: `sudo supervisorctl status`
+2. Check cron job is set: `sudo crontab -l`
+3. Review logs: `tail -f storage/logs/laravel.log`
+
+### "504 Bad Gateway"
+
+PHP-FPM not running:
+
+```bash
+sudo systemctl status php8.3-fpm
+sudo systemctl restart php8.3-fpm
+```
+
+---
+
+## Production Deployment Checklist
+
+Before going live, complete:
+
+- [ ] PHP 8.3+ with all required extensions installed
+- [ ] Database created with proper user permissions
+- [ ] `.env` configured with production values
+- [ ] `APP_KEY` generated and backed up securely
+- [ ] Web server (Nginx or Apache) configured
+- [ ] SSL certificate installed and auto-renewal enabled
+- [ ] Cron job configured for `schedule:run`
+- [ ] Queue workers running via Supervisor
+- [ ] File permissions set correctly
+- [ ] Database migrations completed
+- [ ] Admin user created
+- [ ] Backups configured (database and files)
+- [ ] Monitoring set up (check logs, queue health)
+- [ ] Domain DNS pointed to server
+
+---
+
+## Next Steps
+
+**Immediate:**
+1. [Configure your environment](/docs/general/configuration) — Set up database, queues, email services
+2. [Add email services](/docs/features/email-services) — Connect SendGrid, Postmark, or other providers
+3. [Import subscribers](/docs/features/subscribers) — Add your audience
+
+**After Initial Setup:**
+- [Create your first campaign](/docs/features/campaigns)
+- Set up [monitoring and logging](#)
+- Configure [automated backups](#)
+
+**Production Hardening:**
+- Enable [two-factor authentication](#) for admin users
+- Set up [IP whitelisting](#) for admin panel
+- Configure [rate limiting](#)
+- Enable [detailed logging](#)
+
+---
+
+## Getting Help
+
+**Issues during installation?**
+- Check [Troubleshooting Guide](#troubleshooting-installation)
+- Review [Configuration Guide](/docs/general/configuration)
+- Check [Laravel documentation](https://laravel.com/docs)
+
+**Deployment help:**
+- Contact your hosting provider
+- Review web server logs: `/var/log/nginx/error.log` or `/var/log/apache2/error.log`
+- Check application logs: `storage/logs/laravel.log`
+
+---
+
+## System Architecture Diagram
+
+```
+┌─────────────────────────────────────────┐
+│         Web Browser / Client            │
+└────────────────────┬────────────────────┘
+                     │ HTTPS
+                     ▼
+┌─────────────────────────────────────────┐
+│    Nginx/Apache Web Server              │
+│    (Serves public/ directory)           │
+└────────────────────┬────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────┐
+│    Laravel Mail Platform Application    │
+│    (Routes requests, processes logic)   │
+└────────────────────┬────────────────────┘
+                     │
+         ┌───────────┴───────────┐
+         │                       │
+         ▼                       ▼
+    ┌────────────┐          ┌──────────────┐
+    │  Database  │          │ Queue Worker │
+    │ (MySQL/PG) │          │ (Supervisor) │
+    └────────────┘          └──────────────┘
+                                  │
+                                  ▼
+                            ┌────────────────┐
+                            │ Email Services │
+                            │ (SendGrid, SES)│
+                            └────────────────┘
+```
+
+---
+
+## Quick Reference
+
+**Key directories:**
+- `/var/www/app.laravelmail.com/` — Application root
+- `/var/www/app.laravelmail.com/public/` — Web-accessible files
+- `/var/www/app.laravelmail.com/storage/` — Logs, cache, temp files
+- `/var/www/app.laravelmail.com/.env` — Environment configuration
+
+**Important files:**
+- `.env` — Configuration (keep secure!)
+- `config/mail.php` — Mail configuration
+- `storage/logs/laravel.log` — Application logs
+
+**Common commands:**
+```bash
+php artisan migrate              # Run migrations
+php artisan db:smart-refresh     # Refresh DB preserving data
+php artisan cache:clear         # Clear cache
+php artisan queue:work          # Run queue worker (if not using Docker)
+php artisan tinker              # Interactive shell
+make rebuild                    # Rebuild Docker containers (Recommended)
+make down                       # Stop Docker containers
+make shell                      # Enter application container shell
+```

@@ -1,0 +1,497 @@
+---
+title: Email Services
+description: Laravel Mail Platform requires at least one email service provider to send campaigns. An email service is the backend that actually delivers your emails to reci
+---
+
+# Email Services
+
+## Overview
+
+Laravel Mail Platform requires at least one email service provider to send campaigns. An email service is the backend that actually delivers your emails to recipients' inboxes.
+
+You can configure **multiple email services simultaneously**, which gives you flexibility to:
+- Use different providers for different campaign types (e.g., marketing vs. transactional)
+- Distribute volume across services to avoid rate limits
+- Switch providers without downtime
+- Test different services before committing
+
+**Example:** Send newsletters through Amazon SES (cost-effective for volume) and use Postmark for time-sensitive transactional emails (faster delivery and better support).
+
+---
+
+## Supported Email Service Providers
+
+Laravel Mail Platform integrates with six major email service providers:
+
+| Provider | Best For | Notes |
+|----------|----------|-------|
+| **Amazon SES** | High volume, cost-sensitive | Lowest cost at scale; requires AWS account |
+| **SendGrid** | Marketing campaigns | Excellent deliverability; strong analytics |
+| **Postmark** | Transactional emails | Fast, reliable; best-in-class support |
+| **Mailgun** | Developers, flexibility | Powerful API; developer-friendly |
+| **Mandrill** | MailChimp users | Built-in with MailChimp; being phased out |
+| **SMTP** | Custom/self-hosted | Any SMTP server (Gmail, Office 365, etc.) |
+
+### Provider Comparison
+
+**Volume & Cost:**
+- **Best value:** Amazon SES (cheapest at scale)
+- **Mid-tier:** SendGrid, Mailgun
+- **Premium:** Postmark (higher cost, exceptional service)
+
+**Ease of Setup:**
+- **Easiest:** Postmark, SendGrid (clear dashboards)
+- **Developer-focused:** Mailgun, SMTP
+- **Complex:** Amazon SES (AWS account required)
+
+**Deliverability:**
+- **Excellent:** Postmark, SendGrid, Amazon SES
+- **Good:** Mailgun, Mandrill
+- **Dependent on setup:** SMTP
+
+---
+
+## Before Adding an Email Service
+
+Before configuring any service, you'll need:
+
+1. **An account** with your chosen email service provider
+2. **API credentials** — API key, secret key, or SMTP credentials (varies by provider)
+3. **Verified sending domain** — Most providers require you to verify ownership of your sending domain
+4. **Application Key** — Your Laravel Mail Platform `APP_KEY` (set during [Configuration](/docs/general/configuration))
+
+> **Important:** Store your API credentials securely. Never share them or commit them to version control.
+
+---
+
+## Adding an Email Service
+
+### Step 1: Navigate to Email Services
+
+1. Log in to Laravel Mail Platform
+2. Go to **Settings** → **Email Services**
+3. Click **Add Email Service** or **New Service**
+
+### Step 2: Choose Your Provider
+
+Select the email service provider you want to add from the dropdown list.
+
+### Step 3: Enter Credentials
+
+Fill in the provider-specific credentials. See provider guides below for exact details.
+
+### Step 4: Test the Connection
+
+Click **Test Connection** to verify your credentials are correct. Laravel Mail Platform will send a test email to confirm the service is working.
+
+### Step 5: Save
+
+Click **Save** to store your email service. Credentials are encrypted in the database.
+
+---
+
+## Provider Setup Guides
+
+### Amazon SES
+
+**Best for:** High-volume senders seeking the lowest cost per email.
+
+**Setup time:** 10–15 minutes
+
+**Prerequisites:**
+- AWS account (free tier available)
+- AWS Access Key ID and Secret Access Key
+- Verified sending domain in SES
+
+**Steps:**
+
+1. **Create AWS credentials:**
+- Log in to [AWS Console](https://console.aws.amazon.com/)
+- Go to **Identity and Access Management (IAM)**
+- Create a new user with SES permissions
+- Generate Access Key ID and Secret Access Key
+
+2. **Verify your sending domain:**
+- Go to **Simple Email Service (SES)**
+- Click **Verified Identities**
+- Add your domain and verify ownership (DNS records)
+
+3. **Request production access:**
+- By default, SES accounts are in sandbox mode (limited sending)
+- Submit a request to move to production
+
+4. **Add to Laravel Mail Platform:**
+- Provider: **Amazon SES**
+- AWS Access Key ID: `AKIA...`
+- AWS Secret Access Key: `wJ8+...`
+- Region: `us-east-1` (or your region)
+- From Address: Your verified domain email
+
+**Cost:** $0.10 per 1,000 emails (lowest cost option)
+
+**Pros:** Extremely affordable at scale; AWS ecosystem integration
+**Cons:** Sandbox mode restriction; steeper learning curve
+
+---
+
+### SendGrid
+
+**Best for:** Marketing campaigns with strong analytics and warm support.
+
+**Setup time:** 5–10 minutes
+
+**Prerequisites:**
+- SendGrid account (free trial available)
+- SendGrid API Key
+- Verified sending domain
+
+**Steps:**
+
+1. **Sign up for SendGrid:**
+- Create account at [sendgrid.com](https://sendgrid.com/)
+- Verify your email address
+
+2. **Create an API key:**
+- Go to **Settings** → **API Keys**
+- Click **Create API Key**
+- Choose "Restricted Access"
+- Enable "Mail Send" permission
+- Copy the API key (you won't see it again)
+
+3. **Verify your sender domain:**
+- Go to **Settings** → **Sender Authentication**
+- Follow domain verification steps
+
+4. **Add to Laravel Mail Platform:**
+- Provider: **SendGrid**
+- API Key: Your SendGrid API key
+- From Address: Your verified domain
+
+**Cost:** Free tier (100 emails/day); paid plans start at $20/month
+
+**Pros:** Great deliverability; excellent UI; strong support
+**Cons:** Higher cost than SES at volume
+
+---
+
+### Postmark
+
+**Best for:** Transactional emails requiring speed and reliability.
+
+**Setup time:** 5–10 minutes
+
+**Prerequisites:**
+- Postmark account
+- Server API Token
+- Verified sending domain
+
+**Steps:**
+
+1. **Sign up for Postmark:**
+- Create account at [postmarkapp.com](https://postmarkapp.com/)
+
+2. **Create a server:**
+- Go to **Servers**
+- Click **+ Add Server**
+- Name it (e.g., "Laravel Mail Platform")
+- Copy the Server API Token
+
+3. **Verify your sender domain:**
+- Go to **Senders**
+- Add your domain and verify DNS records
+
+4. **Add to Laravel Mail Platform:**
+- Provider: **Postmark**
+- Server API Token: Your token
+- From Address: Your verified domain
+
+**Cost:** Pay-as-you-go ($1.50 per 1,000 emails) with volume discounts
+
+**Pros:** Fastest delivery times; exceptional support; best for transactional
+**Cons:** Higher per-email cost; best for lower volumes
+
+---
+
+### Mailgun
+
+**Best for:** Developers who want flexibility and powerful APIs.
+
+**Setup time:** 5–10 minutes
+
+**Prerequisites:**
+- Mailgun account (free tier available)
+- API Key and Domain Name
+- Verified sending domain
+
+**Steps:**
+
+1. **Sign up for Mailgun:**
+- Create account at [mailgun.com](https://mailgun.com/)
+
+2. **Add a domain:**
+- Go to **Sending** → **Domains**
+- Click **Add New Domain**
+- Add your domain (e.g., `mail.example.com`)
+- Verify DNS records
+
+3. **Get your API credentials:**
+- Go to **API Security**
+- Copy your API Key
+- Note your domain name (from Domains page)
+
+4. **Add to Laravel Mail Platform:**
+- Provider: **Mailgun**
+- API Key: Your Mailgun API key
+- Domain: Your Mailgun domain (e.g., `mail.example.com`)
+- Region: `US` or `EU`
+- From Address: Your verified domain
+
+**Cost:** Free tier (limited); paid starts at $35/month
+
+**Pros:** Developer-friendly; powerful API; good flexibility
+**Cons:** Steeper learning curve than SendGrid
+
+---
+
+### Mandrill
+
+**Best for:** Users with existing MailChimp accounts (being phased out).
+
+**Setup time:** 5 minutes
+
+**Prerequisites:**
+- Mandrill account (via MailChimp)
+- Mandrill API Key
+- Verified sending domain
+
+**Steps:**
+
+1. **Get your Mandrill API key:**
+- Log in to MailChimp
+- Go to **Extras** → **Mandrill**
+- Click **Settings**
+- Copy your API Key
+
+2. **Add to Laravel Mail Platform:**
+- Provider: **Mandrill**
+- API Key: Your Mandrill API key
+- From Address: Your verified domain
+
+**Cost:** Included with MailChimp (deprecated service)
+
+**Pros:** Integrated with MailChimp
+**Cons:** Mandrill is being phased out; consider migrating to SendGrid or Postmark
+
+> **Note:** Mandrill support is being discontinued. New users should choose SendGrid or Postmark instead.
+
+---
+
+### SMTP (Custom Mail Server)
+
+**Best for:** Self-hosted mail servers or services like Gmail, Office 365, or custom SMTP providers.
+
+**Setup time:** 5–10 minutes
+
+**Prerequisites:**
+- SMTP server address, port, and authentication credentials
+
+**Steps:**
+
+1. **Gather SMTP credentials:**
+- SMTP Host (e.g., `smtp.gmail.com`)
+- SMTP Port (usually 587 for TLS or 465 for SSL)
+- Username (usually your email address)
+- Password or app-specific password
+- Encryption type (TLS or SSL)
+
+2. **Add to Laravel Mail Platform:**
+- Provider: **SMTP**
+- Host: Your SMTP server address
+- Port: `587` (TLS) or `465` (SSL)
+- Username: Your email or SMTP username
+- Password: Your password
+- Encryption: `tls` or `ssl`
+- From Address: Your email address
+
+**Common SMTP Providers:**
+
+| Provider | Host | Port | Encryption |
+|----------|------|------|-----------|
+| **Gmail** | `smtp.gmail.com` | 587 | TLS |
+| **Office 365** | `smtp.office365.com` | 587 | TLS |
+| **Outlook** | `smtp-mail.outlook.com` | 587 | TLS |
+| **Yahoo Mail** | `smtp.mail.yahoo.com` | 465 | SSL |
+
+**Gmail-Specific Setup:**
+- Use an [App Password](https://support.google.com/accounts/answer/185833), not your regular password
+- Enable "[Less secure app access](https://myaccount.google.com/lesssecureapps)" if using regular Gmail password
+
+**Cost:** Free (if using Gmail/Outlook); varies for other services
+
+**Pros:** Maximum flexibility; works with any SMTP server
+**Cons:** You're responsible for deliverability and server reliability
+
+---
+
+## Managing Email Services
+
+### Viewing Your Services
+
+Navigate to **Settings** → **Email Services** to see all configured services:
+- Service name and provider type
+- Verification status
+- Last tested date
+- Actions (Edit, Test, Delete)
+
+### Testing a Service
+
+To verify a service is working correctly:
+
+1. Click **Test** next to the service
+2. Enter a test email address where you want to receive the test message
+3. Click **Send Test Email**
+4. Check your inbox (and spam folder) for the test message
+
+Testing is recommended whenever you add or modify credentials.
+
+### Editing a Service
+
+To update credentials:
+
+1. Click **Edit** next to the service
+2. Update the necessary fields
+3. Click **Test Connection** to verify
+4. Click **Save**
+
+### Deleting a Service
+
+To remove a service:
+
+1. Click **Delete** next to the service
+2. Confirm the deletion
+3. Any campaigns using this service will no longer be able to send
+
+> **Warning:** Deleting a service cannot be undone. Ensure no active campaigns depend on it.
+
+### Setting a Default Service
+
+When creating a new campaign, you can select which email service to use. You can also set a default service that's automatically selected for new campaigns.
+
+---
+
+## Important Security Notes
+
+### Credential Storage
+
+All email service credentials are encrypted in your database using your application's `APP_KEY`. This means:
+
+✅ Credentials are secure at rest
+✅ Credentials are visible only to admin users
+⚠️ If your `APP_KEY` is lost or changed, you'll need to re-enter all credentials
+
+> **Critical:** Back up your `APP_KEY` in a secure location. Store it separately from your `.env` file.
+
+### Lost API Keys
+
+If you lose an API key:
+
+1. **Generate a new key** from your email provider's dashboard
+2. **Update it in Laravel Mail Platform** (edit the service)
+3. **Test the new key** to confirm it works
+4. **Delete the old key** from your provider's dashboard
+
+### Best Practices
+
+- Use separate API keys or accounts for different environments (development, staging, production)
+- Rotate credentials periodically
+- Use restricted permissions (e.g., "Mail Send" only) when available
+- Never share credentials with team members; use your provider's team features instead
+- Monitor email deliverability and bounce rates regularly
+
+---
+
+## Using Multiple Services
+
+### Why Multiple Services?
+
+- **Redundancy** — If one service fails, switch to another
+- **Specialization** — Use SES for newsletters, Postmark for transactional
+- **Volume distribution** — Spread load across multiple providers
+- **Cost optimization** — Use different services for different use cases
+
+### Choosing a Service per Campaign
+
+When creating a campaign, you'll select which email service to use:
+
+1. Go to **Campaigns** → **New Campaign**
+2. Select your email service from the dropdown
+3. Configure the campaign normally
+4. Send using that service
+
+### Load Balancing
+
+If sending very high volumes, consider:
+- Splitting subscriber lists across multiple services
+- Using rate limiting to avoid provider caps
+- Monitoring queue health and adjusting workers
+
+---
+
+## Troubleshooting Email Service Issues
+
+### "Connection refused" or "Authentication failed"
+
+- Verify your API key or SMTP credentials are correct
+- Confirm you copied the full key (no extra spaces)
+- Check that the account hasn't been suspended
+- Ensure your IP is whitelisted (if your provider requires it)
+
+### "Email appears in spam folder"
+
+- **Sender reputation:** Send a small test volume first to warm up
+- **SPF/DKIM records:** Configure DNS records as recommended by your provider
+- **Subject line:** Avoid spam trigger words ("Free," "Urgent," etc.)
+- **Content:** Check email content for spam indicators
+- **Unsubscribe link:** Include a working unsubscribe link
+
+### "Rate limit exceeded"
+
+Your provider is throttling requests. Solutions:
+- Increase queue workers to spread sends over time
+- Choose a provider with higher limits (Postmark, SendGrid)
+- Contact your provider to increase your limit
+- Reduce the number of recipients in one campaign
+
+### "Service not sending emails"
+
+- Verify the service is still configured in **Settings** → **Email Services**
+- Check that campaigns are assigned to this service
+- Ensure queue workers are running (`php artisan queue:work`)
+- Review logs in `storage/logs/laravel.log`
+
+---
+
+## Provider Recommendations by Use Case
+
+**High-volume newsletters:** Amazon SES
+**Marketing campaigns:** SendGrid
+**Transactional emails:** Postmark
+**Developer flexibility:** Mailgun
+**Existing MailChimp user:** Mandrill (but migrate soon)
+**Self-hosted/custom:** SMTP
+
+---
+
+## Next Steps
+
+✅ **Email service added?** You're ready to [create your first campaign](/docs/features/campaigns)
+
+**Need help?**
+- Review individual [provider documentation](https://docs.sendgrid.com/)
+- Check the [Troubleshooting Guide](/docs/troubleshooting)
+- Contact your email service provider's support team
+
+**Next to set up:**
+- [Add subscribers](/docs/features/subscribers)
+- [Create email templates](/docs/features/template)
+- [Create and send campaigns](/docs/features/campaigns)

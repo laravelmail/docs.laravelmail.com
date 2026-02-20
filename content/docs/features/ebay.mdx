@@ -1,0 +1,53 @@
+---
+title: eBay Integration
+description: The eBay integration allows you to connect your eBay seller account to Laravel Mail to sync products/listings and manage basic account settings.
+---
+
+# eBay Integration
+
+The eBay integration allows you to connect your eBay seller account to Laravel Mail to sync products/listings and manage basic account settings.
+
+## Features
+
+- **Connect Account**: Securely connect your eBay account via OAuth.
+- **Listings Sync**: Sync your active and ended listings from eBay to the platform.
+- **Sync History**: View logs of previous sync operations.
+- **Account Management**: View account status, token expiration, and disconnect when needed.
+
+## connecting an Account
+
+1.  Navigate to **Settings -> Integrations -> eBay**.
+2.  Click **Connect Account**.
+3.  You will be redirected to eBay's authorization page.
+4.  Log in and approve the application permissions.
+5.  Upon success, you will be redirected back to the platform.
+
+## Syncing Listings
+
+You can sync listings manually or rely on scheduled jobs (if configured).
+
+### Manual Sync
+
+1.  Go to the eBay Listings page.
+2.  Click **Sync Now** to start a sync process.
+3.  The system will fetch active listings and update local records.
+
+## API Reference
+
+The following API endpoints are available for eBay integration:
+
+### Accounts
+
+-   `GET /api/ebay/accounts` - List connected accounts
+-   `GET /api/ebay/accounts/\&#123;id\&#125;/stats` - Get account sync stats
+-   `POST /api/ebay/accounts/connect` - Initiate connection
+-   `DELETE /api/ebay/accounts/\&#123;id\&#125;` - Disconnect account
+-   `POST /api/ebay/accounts/\&#123;id\&#125;/refresh-token` - Refresh OAuth token
+
+### Listings
+
+-   `GET /api/ebay/listings` - List listings
+-   `GET /api/ebay/listings/\&#123;id\&#125;` - Get listing details
+-   `POST /api/ebay/listings/sync` - Sync specific listing
+-   `POST /api/ebay/listings/bulk-sync` - Bulk sync listings
+-   `DELETE /api/ebay/listings/\&#123;id\&#125;` - End listing locally (does not end on eBay)

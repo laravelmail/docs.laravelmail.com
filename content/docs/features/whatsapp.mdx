@@ -1,0 +1,76 @@
+---
+title: WhatsApp Baileys Service
+description: The WhatsApp Baileys service is now configured to start automatically with your application.
+---
+
+# WhatsApp Baileys Service
+
+## Auto-Start Configuration
+
+The WhatsApp Baileys service is now configured to start automatically with your application.
+
+### Supervisor Configuration
+
+The service is managed by Supervisor and will:
+- **Auto-start** when the container starts
+- **Auto-restart** if it crashes
+- **Log** to `storage/logs/whatsapp-baileys.log`
+
+### Service Management
+
+Use the helper script to manage the service:
+
+```bash
+# Check status
+./whatsapp-service.sh status
+
+# Start service
+./whatsapp-service.sh start
+
+# Stop service
+./whatsapp-service.sh stop
+
+# Restart service
+./whatsapp-service.sh restart
+
+# View logs
+./whatsapp-service.sh logs
+
+# View errors
+./whatsapp-service.sh errors
+```
+
+### Docker Commands
+
+Inside the container:
+
+```bash
+# Check if service is running
+supervisorctl status whatsapp-baileys
+
+# Restart the service
+supervisorctl restart whatsapp-baileys
+
+# View all services
+supervisorctl status
+```
+
+### Configuration
+
+The service runs on port **3000** by default. To change this, update:
+- `docker/supervisord.conf` - Set `WHATSAPP_PORT` environment variable
+- `whatsapp-service.js` - Update `PORT` constant
+
+### Logs Location
+
+- **Standard output**: `/var/www/storage/logs/whatsapp-baileys.log`
+- **Error output**: `/var/www/storage/logs/whatsapp-baileys-error.log`
+
+### Connecting to WhatsApp
+
+1. Navigate to `/admin/whatsapp/inbox`
+2. Click "Connect WhatsApp (Baileys)" button
+3. Scan the QR code with your phone
+4. Start messaging!
+
+The service will automatically reconnect if disconnected.

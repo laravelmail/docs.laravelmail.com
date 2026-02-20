@@ -1,0 +1,118 @@
+---
+description: Learn how to pass data around the workflow
+title: Managing the State
+---
+
+# Managing the State
+
+Generally speaking, the purpose of a workflow is to get an input state, make able the nodes to manipulate this state during execution, and return the state as final value. Based on this architecture the state has two main roles that we will see in detail in this guide.
+
+### Workflow Input/Output
+
+The final return value of the workflow itself is an instance of the workflow state. So, if you need to collect the result of the workflow execution, nodes must be able to write and read from the state until the workflow ends and return the final state to the parent script.
+
+You can also provide an initial state to workflow to feed in input values.
+
+```php
+// 1. Provide an initial state as workflow input to feed in some data
+$workflow = Workflow::make(new WorkflowState(['query' => 'Hi!']))
+        ->addNode(new InitialNode())
+        ->addNode(...)
+        ->addNode(...);
+
+// 2. Execute the workflow and get the final state
+$finalState = $workflow->start()->getReturn();
+
+// 3. Use the final state data
+echo $finalState->get('message');
+```
+
+### Using state in nodes
+
+In our examples so far, we have passed data from node to node using properties of custom events. This is a powerful way to pass data around, but it has limitations. For example, if you want to pass data between steps that are not directly connected, you need to pass the data through all the nodes in between. This can make your code harder to read and maintain.
+
+For this reasons we have the `WorkflowState` object available to every node in the workflow. To use it, the workflow inject the WorkflowState instance as the second argument of the node.&#x20;
+
+```php
+namespace App\Neuron;
+
+use NeuronAI\Workflow\Node;
+use NeuronAI\Workflow\StartEvent;
+use NeuronAI\Workflow\StopEvent;
+use NeuronAI\Workflow\WorkflowState;
+
+class InitialNode extends Node
+\&#123;
+    public function __invoke(StartEvent $event, WorkflowState $state): StopEvent
+    \&#123;
+        $state->set('message', 'Hello World!');
+        
+        return new StopEvent();
+    \&#125;
+\&#125;
+
+// Execute the workflow and get the final state
+$finalState = Workflow::make()
+    ->addNode(new InitialNode())
+    ->start()
+    ->getReturn();
+    
+// It will print "Hello World!"
+echo $finalState->get('message');
+```
+
+### Typed State
+
+The default `WorkflowState` class is just a proxy to an internal array to carry data during workflow execution. It might be useful to create a custom state class to define strictly typed properties for better code completion, validation, and debugging.
+
+Create a `CustomState` class:
+
+```php
+use App\Models\User;
+use NeuronAI\Workflow\WorkflowState;
+
+class CustomState extends WorkflowState
+\&#123;
+    protected User $user;
+    
+    public function setUser(User $user): CustomState
+    \&#123;
+        $this->user = $user;
+        return $this;
+    \&#125;
+    
+    public function getUser(): User
+    \&#123;
+        return $this->user;
+    \&#125;
+\&#125;
+```
+
+Nodes can accept an instance of `CustomState` instead of the default `WorkflowState`:
+
+```php
+class ExampleNode extends Node 
+\&#123;
+    public function __invoke(StartEvent $event, CustomState $state): StopEvent
+    \&#123;
+        // Use state properties in your nodes
+        if ($state->getUser()->isAdmin()) \&#123;
+            //...
+        \&#125;
+        
+        return new StopEvent();
+    \&#125;
+\&#125;
+```
+
+Finally, inject the `CustomState` into the workflow:
+
+```php
+$state = new CustomState();
+$state->setUser($user);
+
+$workflow = MyWorkflow::make($state);
+
+$finalState = $workflow->start()->getResult();
+echo $finalState->getUser()->email;
+```

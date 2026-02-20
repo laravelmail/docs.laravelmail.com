@@ -1,0 +1,102 @@
+---
+title: Temporal IO Workflows
+description: Laravel Mail Platform utilizes **Temporal IO** for robust, durable execution of complex workflows. Temporal ensures that critical processes like product imports
+---
+
+# Temporal IO Workflows
+
+Laravel Mail Platform utilizes **Temporal IO** for robust, durable execution of complex workflows. Temporal ensures that critical processes like product imports and AI content generation run reliably, even in the presence of failures.
+
+## Overview
+
+We use Temporal to manage long-running and multi-step processes.
+
+- **Durable**: Workflows can run for seconds or years. State is persisted.
+- **Reliable**: Automatic retries for failed activities.
+- **Scalable**: Independent workers scale with load.
+
+## Configured Workflows
+
+The platform currently implements the following workflows:
+
+### 1. Product Import Workflow (`ProductImportWorkflow`)
+Handles the import of products from CSV files or external APIs.
+
+- **Workflow ID**: `product-import-\&#123;uuid\&#125;`
+- **Input**: Source URL (or file path), detailed options.
+- **Activities**:
+  - `downloadFile`: Fetches the remote CSV/JSON.
+  - `parseContent`: Processes the data structure.
+  - `upsertProduct`: Creates or updates products in the database.
+  - `notifyAdmin`: Sends a completion notification.
+
+### 2. AI Content Generation (`AiGenerationWorkflow`)
+Orchestrates the generation of marketing content using AI models.
+
+- **Workflow ID**: `ai-gen-\&#123;uuid\&#125;`
+- **Activities**:
+  - `generateSubjectLine`: Generates email subjects.
+  - `generateBody`: Drafts email body copy.
+  - `optimizeContent`: Refines content based on SEO/engagement rules.
+
+---
+
+## Architecture
+
+### The Worker
+A dedicated artisan command runs the Temporal worker:
+
+```bash
+php artisan temporal:worker
+```
+
+This command connects to the Temporal server and polls for tasks. It registers:
+- `ProductImportWorkflow`
+- `AiGenerationWorkflow`
+- `TaskActivity`
+- `ProductImportActivity`
+- `AiGenerationActivity`
+
+### Infrastructure (Docker)
+Our `docker-compose.yaml` includes:
+- **`temporal`**: The Temporal server (auto-setup image).
+- **`temporal-ui`**: The web dashboard, accessible at port `8080`.
+
+---
+
+## Managing Workflows
+
+### Starting the Worker
+In a production environment, the worker should be managed by Supervisor (similar to queue workers).
+
+**Supervisor Config Example:**
+```ini
+[program:temporal-worker]
+command=php /var/www/artisan temporal:worker
+autostart=true
+autorestart=true
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/var/www/storage/logs/temporal-worker.log
+```
+
+### Monitoring
+You can monitor workflow execution via the Temporal UI:
+
+1. Open `http://localhost:8080` (or your server's mapped port).
+2. View **Workflows** to see running, completed, and failed executions.
+3. Click a **Run ID** to view the event history, stack trace, and pending activities.
+
+---
+
+## Development & Troubleshooting
+
+**Starting Temporal Locally:**
+Ensure the `temporal` service is running in Docker:
+```bash
+docker-compose up -d temporal temporal-ui
+```
+
+**Common Issues:**
+- **Connection Refused**: Ensure `TEMPORAL_ADDRESS` in `.env` matches your Docker service name (default `temporal:7233`).
+- **Workflow Timed Out**: Check if your worker is running (`php artisan temporal:worker`). If the worker isn't running, workflows will sit in a "Running" state indefinitely until a worker picks them up.

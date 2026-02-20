@@ -1,0 +1,42 @@
+---
+title: Google Merchant Center Integration
+description: Sync your products to Google Merchant Center to list them on Google Shopping.
+---
+
+# Google Merchant Center Integration
+
+Sync your products to Google Merchant Center to list them on Google Shopping.
+
+## Features
+
+-   **Connect Merchant Center**: Link your Google Merchant Center account.
+-   **Product Sync**: Push your products to Google Merchant Center.
+-   **Account Management**: View connection status and disconnect.
+
+## Connecting an Account
+
+1.  Navigate to **Settings -> Integrations -> Google Merchant**.
+2.  Click **Connect**.
+3.  Authenticate with your Google account that has access to Merchant Center.
+4.  Grant the requested permissions.
+5.  On return, select the specific Merchant ID if multiple are available.
+
+## Syncing Products
+
+You can sync all products or select specific ones.
+
+1.  Go to the Google Merchant integration page.
+2.  Select the products you want to sync (or select all).
+3.  Click **Sync Selected** or **Sync All**.
+
+## API Reference
+
+### Accounts
+
+-   `GET /api/google-merchant/accounts` - List connected accounts
+-   `POST /api/google-merchant/accounts/connect` - Initiate OAuth connection
+-   `DELETE /api/google-merchant/accounts/\&#123;id\&#125;` - Disconnect account
+
+### Products
+
+-   `POST /api/google-merchant/products/sync` - Sync products to Google Merchant Center

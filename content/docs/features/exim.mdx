@@ -1,0 +1,700 @@
+---
+title: Configuring Exim for Laravel
+description: Exim is a powerful Mail Transfer Agent (MTA) responsible for routing, delivering, and receiving emails on your server. While Laravel provides an elegant abstrac
+---
+
+# Configuring Exim for Laravel
+
+## Overview
+
+Exim is a powerful Mail Transfer Agent (MTA) responsible for routing, delivering, and receiving emails on your server. While Laravel provides an elegant abstraction layer for sending emails through its `Mail` facade, the actual delivery depends on an underlying MTA—and Exim is one of the most popular choices for Linux servers.
+
+This guide covers everything a Laravel developer needs to know about configuring Exim, from basic setup to advanced email routing and security.
+
+---
+
+## Why Exim for Laravel Developers?
+
+Understanding Exim is essential for several reasons:
+
+**Troubleshooting Email Issues** — When campaigns don't arrive, knowing how Exim works helps you diagnose bounces, queue issues, and delivery failures.
+
+**Security** — Proper configuration prevents your server from being exploited for spam or phishing, protecting your domain reputation.
+
+**Advanced Scenarios** — Custom email routing, rate limiting, relay authentication, and integration with third-party services all require Exim knowledge.
+
+**Server Reliability** — You can monitor queue health, optimize delivery settings, and implement retries for failed emails.
+
+---
+
+## System Requirements
+
+Before installing Exim, ensure your server meets these requirements:
+
+| Component | Requirement | Notes |
+|-----------|-------------|-------|
+| **OS** | Linux (most common) | Works on BSD and macOS too |
+| **RAM** | 256 MB minimum | 512 MB+ recommended for production |
+| **Disk Space** | 1 GB minimum | For mail queue and logs |
+| **Dependencies** | PCRE2, OpenSSL, optional DBM | Installed during build |
+
+### Required Dependencies
+
+Most Linux distributions package Exim pre-built, but if building from source, install:
+
+**Ubuntu/Debian:**
+```bash
+sudo apt-get install build-essential libpcre2-dev libssl-dev
+```
+
+**CentOS/RHEL:**
+```bash
+sudo yum install gcc libpcre2-devel openssl-devel
+```
+
+**macOS:**
+```bash
+brew install pcre2 openssl
+```
+
+---
+
+## Installation
+
+### Option 1: Package Manager (Recommended for Most Users)
+
+The simplest approach is using your distribution's package manager:
+
+**Ubuntu/Debian:**
+```bash
+sudo apt-get update
+sudo apt-get install exim4
+sudo systemctl enable exim4
+sudo systemctl start exim4
+```
+
+**CentOS/RHEL:**
+```bash
+sudo yum install exim
+sudo systemctl enable exim
+sudo systemctl start exim
+```
+
+**Verify installation:**
+```bash
+exim -v
+```
+
+### Option 2: Build from Source (Advanced Users)
+
+For custom configurations or specific versions:
+
+```bash
+# Download the latest version
+wget https://ftp.exim.org/pub/exim/exim4/exim-4.97.tar.gz
+tar -xvzf exim-4.97.tar.gz
+cd exim-4.97
+
+# Build with common options
+./configure --with-pcre2 --with-openssl
+make
+sudo make install
+
+# Create Exim user and group
+sudo useradd -r -s /bin/false exim
+sudo groupadd -r exim
+
+# Set permissions
+sudo chown -R exim:exim /var/spool/exim
+sudo chmod -R 750 /var/spool/exim
+```
+
+---
+
+## Core Exim Concepts
+
+### The Configuration File
+
+Exim's behavior is controlled by a single configuration file at `/etc/exim/exim.conf` (or `/etc/exim4/exim4.conf` on Debian).
+
+**Key characteristics:**
+- Uses a simple key-value format
+- Comments start with `#`
+- Whitespace is flexible (leading/trailing ignored)
+- Divided into logical sections: Main settings, Routers, Transports, Authenticators, ACLs
+
+### Mail Flow
+
+Exim processes emails through these stages:
+
+```
+Reception (SMTP, local submission)
+    ↓
+Authentication (if required)
+    ↓
+Routing (determine destination)
+    ↓
+Transport (actual delivery method)
+    ↓
+Completion (successful/failed/deferred)
+```
+
+### Drivers: How Exim Processes Mail
+
+Exim uses drivers to handle different tasks:
+
+**Routers** — Determine how to route an email based on the recipient address
+- `dnslookup`: Routes via DNS MX records
+- `manualroute`: Routes to specific hosts
+- `redirect`: Forwards or aliases emails
+- `accept`: Accepts mail for local delivery
+
+**Transports** — Define how to actually deliver emails
+- `smtp`: Sends to remote servers via SMTP
+- `appendfile`: Delivers to local mailboxes
+- `pipe`: Pipes email to a command
+- `autoreply`: Sends automatic replies
+
+**Authenticators** — Handle SMTP authentication
+- `plain`: Basic username/password
+- `login`: Microsoft Login authentication
+- `cram_md5`: CRAM-MD5 authentication
+
+### The Spool Directory
+
+Exim stores messages temporarily in `/var/spool/exim` while processing and retrying. This directory is critical for:
+- Queue management
+- Retry logic
+- Bounce handling
+
+Monitor spool health:
+```bash
+du -sh /var/spool/exim
+exim -bp | wc -l  # Count queued messages
+```
+
+---
+
+## Essential Configuration for Laravel
+
+### Step 1: Set Basic Global Options
+
+Edit `/etc/exim/exim.conf` and configure these fundamental settings:
+
+```exim
+# Global settings
+primary_hostname = mail.example.com
+qualify_domain = example.com
+qualify_recipient = example.com
+
+# Mail locally for these domains
+local_domains = example.com : *.example.com
+
+# Users allowed to send without authentication
+trusted_users = www-data : mail : root
+
+# Log settings
+log_file_path = /var/log/exim/%slog
+log_selector = +all
+```
+
+**What each does:**
+
+- `primary_hostname` — Your server's FQDN
+- `qualify_domain` — Default domain for unqualified addresses (e.g., `www-data` becomes `www-data@example.com`)
+- `local_domains` — Domains treated as local (colon-separated)
+- `trusted_users` — Web server user (www-data) should be trusted so Laravel can send mail without authentication
+- `log_file_path` — Where to store logs (use `%s` for separate files per stage)
+
+### Step 2: Configure TLS/SSL for Encryption
+
+Enable TLS to encrypt SMTP connections:
+
+```exim
+# Enable TLS advertising
+tls_advertise_hosts = *
+
+# Certificate and private key
+tls_certificate = /etc/ssl/certs/example.com.crt
+tls_privatekey = /etc/ssl/private/example.com.key
+
+# Optional: Require TLS for certain routes
+tls_require_ciphers = ALL:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!PSK:!RC4
+```
+
+Use Let's Encrypt for free certificates:
+
+```bash
+sudo certbot certonly --standalone -d mail.example.com
+sudo chown exim:exim /etc/letsencrypt/live/*/privkey.pem
+```
+
+### Step 3: Enable Authentication (Optional)
+
+If you want to allow remote users to send mail through your server:
+
+```exim
+auth_advertise_hosts = *
+
+begin authenticators
+
+plain_auth:
+    driver = plaintext
+    server_condition = $\&#123;if crypteq\&#123;$auth3\&#125;\&#123;$\&#123;extract\&#123;1\&#125;\&#123;:\&#125;\&#123;$\&#123;lookup mysql\&#123;SELECT password FROM users WHERE email='$auth2'\&#125;\\&#125;\&#125;\\&#125;\&#125; \&#123;yes\&#125;\&#123;no\&#125;\\&#125;
+    server_set_id = $auth2
+    server_prompts = Username:: : Password::
+```
+
+> **Security:** Only enable if absolutely necessary. For Laravel, typically mail comes from the local web server, which doesn't need authentication.
+
+---
+
+## Router Configuration
+
+Routers determine how emails reach their destination. Configure these in your Exim config:
+
+### Local Delivery Router
+
+Delivers emails to local users:
+
+```exim
+begin routers
+
+localuser:
+    driver = accept
+    condition = $\&#123;if eq\&#123;$domain\&#125;\&#123;+local_domains\&#125;\\&#125;
+    check_local_user
+    transport = local_delivery
+```
+
+### Remote SMTP Router
+
+Sends emails to external domains via DNS MX records:
+
+```exim
+dnslookup:
+    driver = dnslookup
+    domains = ! +local_domains
+    transport = remote_smtp
+    no_more
+```
+
+### Smart Host Router (For Relay Services)
+
+Route all outgoing mail through a relay service (useful for cloud environments):
+
+```exim
+smarthost:
+    driver = manualroute
+    domains = ! +local_domains
+    transport = smarthost_smtp
+    route_list = * smtp.sendgrid.net
+    no_more
+```
+
+---
+
+## Transport Configuration
+
+Transports define how emails are physically delivered:
+
+### Local Delivery Transport
+
+Delivers emails to local mailboxes:
+
+```exim
+begin transports
+
+local_delivery:
+    driver = appendfile
+    file = /var/mail/$local_part
+    user = mail
+    group = mail
+    mode = 0600
+    directory_mode = 0700
+```
+
+### Remote SMTP Transport
+
+Sends emails to remote servers:
+
+```exim
+remote_smtp:
+    driver = smtp
+    hosts_require_tls = *
+    hosts_try_auth = *
+    dkim_domain = example.com
+    dkim_selector = default
+    dkim_private_key = /etc/exim/dkim-private.key
+```
+
+### Smart Host Transport (For Relay)
+
+```exim
+smarthost_smtp:
+    driver = smtp
+    hosts = smtp.sendgrid.net
+    port = 587
+    hosts_require_auth = *
+    hosts_require_tls = *
+    authenticated_sender = your-sendgrid-user@example.com
+```
+
+---
+
+## Access Control Lists (ACLs)
+
+ACLs control what mail Exim will accept. This is critical for preventing spam and open relay abuse.
+
+### Basic ACL Configuration
+
+```exim
+begin acl
+
+acl_check_rcpt:
+    accept  hosts = :
+    accept  hosts = 127.0.0.1
+    accept  authenticated = *
+    accept  domains = +local_domains
+            local_parts = ^[.] : ^-
+            message = Recipient address invalid
+    accept  domains = +relay_domains
+    deny    message = Relay not permitted
+```
+
+**What this does:**
+- Allow localhost
+- Allow authenticated users
+- Allow mail for local domains
+- Reject relay attempts from unauthorized sources
+
+### Prevent Open Relay
+
+Add this to prevent your server being used for spam:
+
+```exim
+acl_check_rcpt:
+    # ... existing rules ...
+    deny    message = You are not authorized to relay through this server
+            !authenticated = *
+            !hosts = :
+            !hosts = 127.0.0.1
+            sender_domains = ! +local_domains
+```
+
+---
+
+## Macros: Reusable Configuration
+
+Use macros to avoid repetition:
+
+```exim
+# Define macros at the top
+MY_DOMAIN = example.com
+MY_LOCAL_DOMAINS = MY_DOMAIN : *.MY_DOMAIN
+RELAY_HOSTS = 192.168.1.0/24 : 10.0.0.0/8
+
+# Use macros
+local_domains = MY_LOCAL_DOMAINS
+relay_to_domains = RELAY_HOSTS
+```
+
+---
+
+## Integration with Laravel
+
+### Laravel Mail Configuration
+
+Configure Laravel to use your local Exim server:
+
+**.env file:**
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=127.0.0.1
+MAIL_PORT=25
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS="noreply@example.com"
+MAIL_FROM_NAME="Your Application"
+```
+
+**config/mail.php:**
+```php
+'smtp' => [
+    'transport' => 'smtp',
+    'host' => env('MAIL_HOST', 'localhost'),
+    'port' => env('MAIL_PORT', 25),
+    'encryption' => env('MAIL_ENCRYPTION'),
+    'username' => env('MAIL_USERNAME'),
+    'password' => env('MAIL_PASSWORD'),
+],
+```
+
+### Ensure Web Server User Can Send Mail
+
+Laravel runs as the web server user (usually `www-data`). Ensure this user can send mail:
+
+```exim
+trusted_users = www-data
+```
+
+Without this, Laravel's Mail facade will fail with authentication errors.
+
+---
+
+## Monitoring and Debugging
+
+### Check Mail Queue
+
+```bash
+# List all queued messages
+exim -bp
+
+# Count queued messages
+exim -bp | wc -l
+
+# Show detailed info about a message
+exim -Mvc <message-id>
+```
+
+### Test Address Routing
+
+Verify how Exim will route an address:
+
+```bash
+exim -bt user@example.com
+```
+
+Output shows which router and transport will handle the address.
+
+### Enable Debug Logging
+
+Test a specific scenario with debugging:
+
+```bash
+exim -d -bi  # Start debugging with initialization
+```
+
+### View Exim Logs
+
+```bash
+# Recent entries
+tail -f /var/log/exim/main.log
+
+# Search for errors
+grep "Error" /var/log/exim/main.log
+
+# Find messages from/to specific address
+grep "user@example.com" /var/log/exim/main.log
+```
+
+### Force Delivery Retry
+
+If emails are stuck in queue:
+
+```bash
+# Retry all frozen messages
+exim -qff
+
+# Retry and deliver immediately
+exim -v -qff
+```
+
+---
+
+## Security Best Practices
+
+### Run with Minimal Privileges
+
+Exim should not run as root:
+
+```bash
+# Verify Exim runs as exim user
+ps aux | grep exim
+
+# Check file permissions
+ls -l /var/spool/exim
+```
+
+### Secure Your Configuration File
+
+```bash
+sudo chmod 640 /etc/exim/exim.conf
+sudo chown root:exim /etc/exim/exim.conf
+```
+
+### Enable TLS Everywhere
+
+```exim
+tls_advertise_hosts = *
+tls_require_ciphers = ALL:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!PSK:!RC4
+```
+
+### Implement Rate Limiting
+
+Prevent abuse and excessive queue buildup:
+
+```exim
+smtp_accept_max = 100
+smtp_accept_max_per_connection = 10
+```
+
+### SPF, DKIM, and DMARC
+
+Configure DNS records to prevent spoofing:
+
+**SPF Record:**
+```
+v=spf1 mx -all
+```
+
+**DKIM:** Generate keys and add to Exim config
+```bash
+openssl genrsa -out /etc/exim/dkim-private.key 2048
+openssl rsa -in /etc/exim/dkim-private.key -pubout -out /etc/exim/dkim-public.key
+```
+
+---
+
+## Common Laravel Mail Issues and Solutions
+
+### "Connection refused" on Port 25
+
+Exim isn't running or listening:
+
+```bash
+sudo systemctl status exim4
+sudo systemctl start exim4
+netstat -tulnp | grep exim
+```
+
+### Emails Stuck in Queue
+
+Check queue size and retry:
+
+```bash
+exim -bp  # View queue
+exim -v -qff  # Force retry
+```
+
+### "Message rejected" Errors
+
+Review ACL rules:
+
+```bash
+grep "rejected" /var/log/exim/main.log
+```
+
+May indicate:
+- Sender domain mismatch
+- Open relay prevention blocking legitimate mail
+- SPF/DKIM validation failures
+
+### Emails Going to Spam
+
+Improve deliverability:
+
+1. Configure SPF, DKIM, DMARC
+2. Use proper From address (qualify_domain)
+3. Include unsubscribe headers in application
+4. Monitor bounce rates
+
+---
+
+## Advanced Configuration
+
+### Address Rewriting
+
+Rewrite email addresses using patterns:
+
+```exim
+begin rewrite
+
+# Rewrite old domain to new domain
+*@olddomain.com $1@newdomain.com
+
+# Add domain to unqualified addresses
+^([^@]*)$ $1@example.com
+```
+
+### Conditional Routing Based on Size
+
+Route large emails differently:
+
+```exim
+begin routers
+
+large_messages:
+    driver = accept
+    condition = $\&#123;if > \&#123;$message_size\&#125;\&#123;5M\&#125; \&#123;yes\&#125;\&#123;no\&#125;\\&#125;
+    transport = large_message_smtp
+```
+
+### Regular Expressions
+
+Exim uses PCRE2 for powerful pattern matching:
+
+```exim
+# Match specific domain pattern
+domains = ^(mail|smtp)\.example\.com$
+
+# Match email pattern
+local_parts = ^[a-z]+\.[a-z]+$
+```
+
+---
+
+## Troubleshooting Checklist
+
+- [ ] Exim is running: `systemctl status exim4`
+- [ ] Listening on port 25: `netstat -tulnp | grep exim`
+- [ ] Web server user is trusted: `grep www-data /etc/exim/exim.conf`
+- [ ] Configuration is valid: `exim -bV`
+- [ ] Mail queue is healthy: `exim -bp | wc -l`
+- [ ] TLS certificates are valid: `openssl x509 -in /etc/ssl/certs/example.com.crt -noout -dates`
+- [ ] SPF/DKIM/DMARC records are configured
+- [ ] Logs show no errors: `tail /var/log/exim/main.log`
+
+---
+
+## Next Steps
+
+**Getting Started:**
+- [Restart Exim](#) after configuration changes: `sudo systemctl restart exim4`
+- Test with Laravel: Create a test mail job and verify delivery
+- Monitor logs during first week for issues
+
+**Advanced Setup:**
+- Implement [DKIM signing](#advanced-configuration)
+- Set up [mailbox filtering](#) for specific users
+- Configure [rate limiting](#security-best-practices)
+
+**Resources:**
+- [Official Exim Documentation](https://exim.org/exim-html-current/doc/html/spec_html/index.html)
+- [Exim FAQ](https://exim.org/exim-faq.html)
+- [Laravel Mail Documentation](https://laravel.com/docs/mail)
+
+---
+
+## Quick Reference
+
+**Common Commands:**
+```bash
+exim -bp              # List queue
+exim -bt user@host    # Test routing
+exim -d5 -bf test.txt # Debug with file
+exim -qff             # Force retry
+exim -M <msg-id>      # Force delivery of message
+```
+
+**Key Config Files:**
+- `/etc/exim/exim.conf` — Main configuration
+- `/var/spool/exim/` — Mail queue
+- `/var/log/exim/main.log` — Main log
+- `/etc/ssl/certs/` — SSL certificates
+
+**Important Users:**
+- `exim` — Exim process user
+- `mail` — Mailbox owner
+- `www-data` — Web server (must be trusted)
