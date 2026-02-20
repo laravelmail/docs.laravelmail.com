@@ -106,7 +106,7 @@ In this code we:
 * We start the workflow and get the result
 * Print the result in the console
 
-<figure><img src="../.gitbook/assets/workflow-single-step.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/workflow-single-step.png" alt="" /><figcaption></figcaption></figure>
 
 ### Type hint for events
 

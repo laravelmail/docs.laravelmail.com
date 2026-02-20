@@ -128,7 +128,7 @@ The full output will be:
 - NodeTwo complete
 ```
 
-<figure><img src="../.gitbook/assets/workflow-multi-steps.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/workflow-multi-steps.png" alt="" /><figcaption></figcaption></figure>
 
 Of course there is still not much point to a workflow if you just run through it from beginning to end! Let's do some branching and looping.
 

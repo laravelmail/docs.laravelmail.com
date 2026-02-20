@@ -62,7 +62,7 @@ $state = Workflow::make()
 
 You can create a loop from any node to any other node in the workflow by defining the appropriate input event and return events of the invoke method.&#x20;
 
-<figure><img src="../.gitbook/assets/workflow-loop.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/workflow-loop.png" alt="" /><figcaption></figcaption></figure>
 
 The `NodeOne` can even return a StartEvent to jump right to the first node of the Workflow. The event driven architecutre allows you to directly point any node in the workflow both forward and backward.
 
@@ -128,7 +128,7 @@ $state = Workflow::make()
     ->getResult();
 ```
 
-<figure><img src="../.gitbook/assets/workflow-branches.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/workflow-branches.png" alt="" /><figcaption></figcaption></figure>
 
 You can of course combine branches and loops in any order to fulfill the needs of your application.&#x20;
 

@@ -13,7 +13,7 @@ Your application is divided into sections called Nodes which are triggered by Ev
 
 A node can be anything from a single line of code to a complex agent. It can have arbitrary inputs and outputs, which are passed around by Events. It's like n8n at code level.
 
-<figure><img src="../.gitbook/assets/workflow-single-step.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/workflow-single-step.png" alt="" /><figcaption></figcaption></figure>
 
 Workflow allows you to use all the Neuron components like AI providers, embeddings, data loaders, chat history, vector store, etc, as standalone components to create totally customized agentic entities.
 

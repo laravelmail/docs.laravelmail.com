@@ -7,7 +7,7 @@ title: Tools & Toolkits
 
 The core agent loop involves calling a model, letting it choose tools to execute, and then finishing when no more tools are needed to provide a response:
 
-<figure><img src="../.gitbook/assets/NeuronAI.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/NeuronAI.png" alt="" /><figcaption></figcaption></figure>
 
 ### What is a Tool
 
@@ -300,11 +300,11 @@ INSPECTOR_INGESTION_KEY=nwse877auxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 
-<figure><img src="../.gitbook/assets/tools-2.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/tools-2.png" alt="" /><figcaption></figcaption></figure>
 
 In the image below you can see all the details about the execution of the tool to retrieve the transcription of the video:
 
-<figure><img src="../.gitbook/assets/tools-3.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/tools-3.png" alt="" /><figcaption></figcaption></figure>
 
 ## Tool Properties
 
@@ -737,7 +737,7 @@ class MyAgent extends Agent
 
 These toolkits make your agent able to interact with your database. If you ask "How many votes did the authors get in the last 14 days?", the agent doesn’t guess or hallucinate an answer. Instead, it recognizes that this question requires database access, identifies the appropriate tables involved and retrieves real data from your system.
 
-<figure><img src="../.gitbook/assets/data-analyst-ai-agent-php-report.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/data-analyst-ai-agent-php-report.png" alt="" /><figcaption></figcaption></figure>
 
 All the tools in the MySQL and PostgreSQL toolkits require a [PDO](https://www.php.net/manual/en/class.pdo.php) instance as a constructor argument. If you are in a framework environment or you are already using an ORM in general, you can gather the underlying PDO instance from the ORM and pass it to the tools. You can learn more about this implementation strategy in this in-depth article: [https://inspector.dev/mysql-ai-toolkit-bringing-intelligence-to-your-database-layer-in-php/](https://inspector.dev/mysql-ai-toolkit-bringing-intelligence-to-your-database-layer-in-php/)
 
@@ -1102,7 +1102,8 @@ The `user_id` arguments allows you to separate the long term memory in different
 
 #### Simple Email Service (SES)
 
-This tool allows the agent to send an email message to one or more recipients, send notifications, confirmations, reports, or any other email-based communication. The tool handles proper email&#x20;delivery, and basic error handling automatically.
+This tool allows the agent to send an email message to one or more recipients, send notifications, confirmations, reports, or any other email-based communication. The tool handles proper email
+&#x20;delivery, and basic error handling automatically.
 
 In order ti use this tool the AWS sdk for PHP must be installed.
 
@@ -1137,7 +1138,8 @@ class MyAgent extends Agent
 
 ### Supadata YouTube
 
-This toolkit provides access to YouTube video transcriptions, metadata, channel information,\
+This toolkit provides access to YouTube video transcriptions, metadata, channel information,
+\
 and playlist data through Supadata.ai for content analysis and research purposes.
 
 ```php

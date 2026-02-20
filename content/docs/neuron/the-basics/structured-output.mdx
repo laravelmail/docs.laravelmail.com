@@ -18,7 +18,7 @@ This guide assumes you are already familiar with the following concepts:
 
 There are many use cases where we need Agents to understand natural language, but output in a _structured format_. One common use-case is extracting data from text to insert into a database or use with some other downstream system. This guide covers how Neuron allows you to enforce structured outputs from the agent.
 
-<figure><img src="../.gitbook/assets/Neuron AI.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/Neuron AI.png" alt="" /><figcaption></figcaption></figure>
 
 
 [Link](https://www.youtube.com/watch?v=T8PM-t_AQ-c)
@@ -94,7 +94,7 @@ The first is the `SchemaProperty` attribute that allows you to control the JSON 
 
 The second layer is validation. Validation attributes will ensure data gathered from the LLM response are consistent with your requirements.
 
-<figure><img src="../.gitbook/assets/Structured Output Control.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/Structured Output Control.png" alt="" /><figcaption></figcaption></figure>
 
 ### SchemaProperty
 
@@ -194,18 +194,19 @@ class Address
 
 Now when you ask the agent for the structured output you will get the filled instance back:
 
-<pre class="language-php"><code class="lang-php">use NeuronAI\Chat\Messages\UserMessage;
+```php
+use NeuronAI\Chat\Messages\UserMessage;
 use NeuronAI\Observability\AgentMonitoring;
 
-<strong>// Talk to the agent requiring the structured output
-</strong>$person = MyAgent::make()->structured(
+// Talk to the agent requiring the structured output
+$person = MyAgent::make()->structured(
     new UserMessage("I'm John and I want a pizza at st. James Street 00560!"),
     Person::class
 );
 
 echo $person->name.' like '.$person->preference.'. Address: '.$person->address->street;
 // John like pizza. Address: st.James Street
-</code></pre>
+```
 
 ## Array
 
@@ -311,7 +312,7 @@ class Person
 \&#125;
 ```
 
-Or using the "array<...>" syntax:
+Or using the "array&lt;...&gt;" syntax:
 
 ```php
 class Person 
@@ -371,11 +372,11 @@ INSPECTOR_INGESTION_KEY=nwse877auxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 
-<figure><img src="../.gitbook/assets/Neuron Structured Observability.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/Neuron Structured Observability.png" alt="" /><figcaption></figcaption></figure>
 
 Each segment bring its own debug information to follow the agent execution in real time:
 
-<figure><img src="../.gitbook/assets/neuron structured segment.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/neuron structured segment.png" alt="" /><figcaption></figcaption></figure>
 
 
 > **info**
@@ -646,8 +647,9 @@ class Person
 
 The property under validation must be an array that contains all of the given type of object. Notice that you also need to add the doc-block in order to make the agent able to instance the correct class. Use the full class namespace in the doc-block.
 
-<pre class="language-php"><code class="lang-php"><strong>namespace App\Dto;
-</strong>
+```php
+namespace App\Dto;
+
 use NeuronAI\StructuredOutput\Validation\Rules\ArrayOf;
 
 class Person
@@ -658,4 +660,4 @@ class Person
     #[ArrayOf(Tag::class)]
     public array $tags;
 \&#125;
-</code></pre>
+```

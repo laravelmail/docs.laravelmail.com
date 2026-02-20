@@ -11,7 +11,7 @@ This project is inspired by Open Deep Research, which uses LangGraph for impleme
 
 Neuron Open Deep Research provides a structured approach to generating comprehensive research reports on any topic using large language models, with a focus on modularity, extensibility, and real-time results.
 
-<figure><img src="../.gitbook/assets/deep-research-agent.png" alt=""><figcaption><p><a href="https://github.com/neuron-core/deep-research-agent">https://github.com/neuron-core/deep-research-agent</a></p></figcaption></figure>
+<figure><img src="../.gitbook/assets/deep-research-agent.png" alt="" /><figcaption><p><a href="https://github.com/neuron-core/deep-research-agent">https://github.com/neuron-core/deep-research-agent</a></p></figcaption></figure>
 
 ### Architecture
 
@@ -37,7 +37,7 @@ Stack Used:
 * Neuron Workflow for multi-agent orchestration.
 * [SerpAPI](https://serpapi.com/) for finding hotels, flights and places to visit comprehensive research reports on any topic using large language models, with a focus on modularity, extensibility, and real-time results.
 
-<figure><img src="../.gitbook/assets/travel-planner-agent.jpeg" alt=""><figcaption><p><a href="https://github.com/neuron-core/travel-planner-agent">https://github.com/neuron-core/travel-planner-agent</a></p></figcaption></figure>
+<figure><img src="../.gitbook/assets/travel-planner-agent.jpeg" alt="" /><figcaption><p><a href="https://github.com/neuron-core/travel-planner-agent">https://github.com/neuron-core/travel-planner-agent</a></p></figcaption></figure>
 
 ### Architecture
 
@@ -64,7 +64,7 @@ Stack Used:
 * [Neuron Workflow](https://docs.neuron-ai.dev/workflow/getting-started) for multi-agent orchestration.
 * [SerpAPI](https://serpapi.com/) for finding hotels, flights and places to visit comprehensive research reports on any topic using large language models, with a focus on modularity, extensibility, and real-time results.
 
-<figure><img src="../.gitbook/assets/laravel-travel-planner-ai-agent.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/laravel-travel-planner-ai-agent.png" alt="" /><figcaption></figcaption></figure>
 
 ### How to use this project
 
