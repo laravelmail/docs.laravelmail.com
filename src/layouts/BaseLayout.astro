@@ -25,6 +25,18 @@ const {
             imageAlt={imageAlt}
             contentType={contentType}
         />
+
+        <!-- Google tag (gtag.js) -->
+        <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-V4RXY7MZHW"
+        ></script>
+        <script is:inline>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+            gtag("js", new Date());
+            gtag("config", "G-V4RXY7MZHW");
+        </script>
     </head>
 
     <body
