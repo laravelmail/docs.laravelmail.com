@@ -33,7 +33,7 @@ export const SITE: SiteConfig = {
     author: "Stefan",
     authorUrl: "https://laravelmail.com",
     repo: "https://github.com/laravelmail/docs.laravelmail.com",
-    title: "Laravel Mail Documentation",
+    title: "Laravel mail documentation",
     description:
         "Comprehensive documentation for Laravel Mail Platform and Neuron AI integration",
     image: setupImage,

@@ -39,7 +39,7 @@ const tableOfContentsHeadings = headings
     .filter((heading): heading is Heading => Boolean(heading.id));
 ---
 
-<BaseLayout>
+<BaseLayout title={frontmatter.data.navLabel ?? frontmatter.data.title}>
     <div class="flex min-h-screen">
         <!-- Sidebar with tabs inside  -->
         <Sidebar

@@ -12,12 +12,14 @@ import type { HeadSEOProps } from "@/lib/types";
 
 // Props with fallbacks from SITE config
 const {
-    title = SITE.title,
+    title: pageTitle,
     description = SITE.description,
     image = SITE.image, // string | imported asset | content collection image()
     imageAlt = SITE.imageAlt,
     noIndex = false,
 } = Astro.props as HeadSEOProps;
+
+const title = pageTitle && pageTitle !== SITE.title ? `${pageTitle} | ${SITE.title}` : SITE.title;
 
 const canonicalURL = new URL(Astro.url);
 // Prefer configured site URL when Astro.site isn't available (e.g., in dev)
