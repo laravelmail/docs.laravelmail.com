@@ -285,7 +285,7 @@ Configure your web server to serve Laravel Mail Platform from the `public` direc
 Create `/etc/nginx/sites-available/campaigns`:
 
 ```nginx
-server \&#123;
+server {
     listen 80;
     server_name campaigns.example.com;
     root /var/www/app.laravelmail.com/public;
@@ -293,9 +293,9 @@ server \&#123;
 
     # Redirect all HTTP to HTTPS
     return 301 https://$server_name$request_uri;
-\&#125;
+}
 
-server \&#123;
+server {
     listen 443 ssl http2;
     server_name campaigns.example.com;
     root /var/www/app.laravelmail.com/public;
@@ -310,21 +310,21 @@ server \&#123;
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header X-Content-Type-Options "nosniff" always;
 
-    location / \&#123;
+    location / {
         try_files $uri $uri/ /index.php?$query_string;
-    \&#125;
+    }
 
-    location ~ \.php$ \&#123;
+    location ~ \.php$ {
         fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
         include fastcgi_params;
-    \&#125;
+    }
 
-    location ~ /\.ht \&#123;
+    location ~ /\.ht {
         deny all;
-    \&#125;
-\&#125;
+    }
+}
 ```
 
 Enable the site:
