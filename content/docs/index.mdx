@@ -499,12 +499,19 @@ php artisan tinker
 Then in Tinker:
 
 ```php
-App\Models\User::create([
+$admin = App\Models\User::create([
     'name' => 'Admin User',
     'email' => 'admin@example.com',
     'password' => Hash::make('secure-password'),
     'email_verified_at' => now(),
 ]);
+
+$workspace = App\Models\Workspace::create([
+    'name' => 'Acme Corps',
+    'owner_id' => $admin->id
+]);
+
+> $workspace->users()->attach($admin, ['role' => App\Infrastructure\Persistence\Eloquent\Models\Workspace::ROLE_OWNER]);
 ```
 
 Or via setup command (if available):
